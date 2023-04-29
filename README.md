@@ -5,7 +5,7 @@
 
 ### Environments
 - java 11
-- mysql
+- oracle
 - springboot 2.7.10
 - gradle
 
