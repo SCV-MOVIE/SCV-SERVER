@@ -1,6 +1,6 @@
 # SCV-SERVER
 
-- master, feature 브랜치로 운영 
+- master, feature 브랜치로 운영
 - application.yml 파일의 내용은 노션에서 관리
 
 ### Environments
