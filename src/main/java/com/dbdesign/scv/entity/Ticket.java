@@ -34,7 +34,7 @@ public class Ticket {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "showtime_id")
-    private Showtime shotime;
+    private Showtime showtime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

@@ -22,8 +22,8 @@ public class Bank {
     @Column(name = "approve_nm")
     private String approveNm;
 
-    private String customer;
-    private String scv;
+    private String source;
+    private String destination;
 
     private int price;
 
