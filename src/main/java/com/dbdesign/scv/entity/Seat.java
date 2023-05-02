@@ -20,7 +20,7 @@ public class Seat {
     private Long id;
 
     @Column(name = "seat_nm")
-    private int seatNm;
+    private String seatNm;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theater_id")
