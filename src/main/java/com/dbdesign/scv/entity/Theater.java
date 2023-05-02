@@ -24,6 +24,7 @@ public class Theater {
 
     private String layout;
     private String name;
+    private Number deleted;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theater_type_id")
