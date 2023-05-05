@@ -30,6 +30,9 @@ public class Bank {
     @Column(name = "created_at")
     private String createdAt;
 
+    @Column(name = "updated_at")
+    private String updatedAt;
+
     private String status;
     private String method;
 }

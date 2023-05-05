@@ -20,7 +20,7 @@ public class Movie {
     private Long id;
 
     private String name;
-    private String length;
+    private int length;
     private String rating;
     private String director;
     private String introduction;

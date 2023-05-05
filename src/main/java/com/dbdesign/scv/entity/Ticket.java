@@ -32,6 +32,9 @@ public class Ticket {
     @Column(name = "reserve_nm")
     private String reserveNm;
 
+    @Column(name = "updated_at")
+    private String updatedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "showtime_id")
     private Showtime showtime;
