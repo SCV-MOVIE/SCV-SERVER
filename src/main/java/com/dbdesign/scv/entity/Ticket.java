@@ -40,6 +40,6 @@ public class Ticket {
     private Showtime showtime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "client_id")
+    private Client client;
 }

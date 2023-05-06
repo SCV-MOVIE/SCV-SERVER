@@ -25,7 +25,7 @@ public class Showtime {
     private String round;
 
     @Column(name = "is_public")
-    private Number isPublic;
+    private char isPublic;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")

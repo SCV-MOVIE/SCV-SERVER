@@ -20,11 +20,11 @@ public class Theater {
     private Long id;
 
     @Column(name = "is_occupied")
-    private Number isOccupied;
+    private char isOccupied;
 
     private String layout;
     private String name;
-    private Number deleted;
+    private char deleted;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theater_type_id")
