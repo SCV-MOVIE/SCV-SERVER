@@ -12,8 +12,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user")
-public class User {
+@Table(name = "client")
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +34,7 @@ public class User {
     private String phoneNm;
 
     @Column(name = "is_member")
-    private Number isMember;
+    private char isMember;
 
-    private String level;
+    private String membership;
 }
