@@ -19,9 +19,6 @@ public class Theater {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "is_occupied")
-    private char isOccupied;
-
     private String layout;
     private String name;
     private char deleted;

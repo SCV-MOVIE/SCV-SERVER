@@ -27,6 +27,9 @@ public class Showtime {
     @Column(name = "is_public")
     private char isPublic;
 
+    @Column(name = "sold_out")
+    private char soldOut;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
     private Movie movie;
