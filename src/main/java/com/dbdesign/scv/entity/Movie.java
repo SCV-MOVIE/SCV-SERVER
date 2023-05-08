@@ -26,9 +26,10 @@ public class Movie {
     private String introduction;
     private String distributor;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "img_url")
+    private String imgUrl;
 
     private String actor;
     private String staff;
+    private char deleted = 'N';
 }
