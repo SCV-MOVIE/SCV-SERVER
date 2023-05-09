@@ -29,6 +29,7 @@ public class Showtime {
 
     @Column(name = "sold_out")
     private char soldOut;
+    private char deleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
