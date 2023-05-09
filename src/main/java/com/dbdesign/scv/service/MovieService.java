@@ -33,6 +33,10 @@ public class MovieService {
     @Transactional
     public void registerMovie(MovieFormDTO movieFormDTO) {
 
+        if (checkMovieNameDuplicate(movieFormDTO.getName())) { // 중복 등록 방지
+            throw new IllegalArgumentException("이미 등록된 영화입니다.");
+        }
+
         Movie movie = Movie.builder()
                 .name(movieFormDTO.getName())
                 .length(movieFormDTO.getLength())
@@ -55,6 +59,12 @@ public class MovieService {
 
             movieGenreRepository.save(movieGenre);
         }
+    }
+
+    // 영화명 중복 체크
+    public boolean checkMovieNameDuplicate(String movieName) {
+
+        return movieRepository.existsByName(movieName);
     }
 
     // 영화 정보 수정
@@ -139,6 +149,10 @@ public class MovieService {
     // 장르 등록
     @Transactional
     public void registerGenre(GenreDTO genreDTO) {
+
+        if (genreRepository.findGenreByName(genreDTO.getName()) != null) { // 중복 등록 방지
+            throw new IllegalArgumentException("이미 등록된 장르입니다.");
+        }
 
         Genre genre = new Genre();
         genre.setName(genreDTO.getName());
