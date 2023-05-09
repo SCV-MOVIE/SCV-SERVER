@@ -131,9 +131,18 @@ public class ClientService {
             throw new IllegalArgumentException("회원이 존재하지 않습니다.");
         }
 
-        // 새로 수정할 로그인 아이디가 중복되는 경우
-        if (clientRepository.existsByLoginId(updateUserInfoDTO.getNewLoginId())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        for (Client client1 : clientRepository.findAll()) {
+            if (client1 != client) {
+                // 본인을 제외하고 새로 수정할 로그인 아이디가 중복되는 경우
+                if (client1.getLoginId().equals(updateUserInfoDTO.getNewLoginId())) {
+                    throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+                }
+
+                // 본인을 제외하고 새로 수정할 전화번호가 중복되는 경우
+                if (client1.getPhoneNm().equals(updateUserInfoDTO.getNewPhoneNm())) {
+                    throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
+                }
+            }
         }
 
         client.setLoginId(updateUserInfoDTO.getNewLoginId());
