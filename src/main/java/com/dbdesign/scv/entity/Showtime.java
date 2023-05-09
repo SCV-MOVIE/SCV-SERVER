@@ -27,8 +27,8 @@ public class Showtime {
     @Column(name = "is_public")
     private char isPublic;
 
-    @Column(name = "sold_out")
-    private char soldOut;
+    @Column(name = "is_sold_out")
+    private char isSoldOut;
     private char deleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
