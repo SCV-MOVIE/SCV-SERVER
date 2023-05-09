@@ -4,9 +4,11 @@ import com.dbdesign.scv.dto.*;
 import com.dbdesign.scv.entity.Admin;
 import com.dbdesign.scv.entity.BankAdmin;
 import com.dbdesign.scv.entity.Client;
+import com.dbdesign.scv.entity.Ticket;
 import com.dbdesign.scv.repository.AdminRepository;
 import com.dbdesign.scv.repository.BankAdminRepository;
 import com.dbdesign.scv.repository.ClientRepository;
+import com.dbdesign.scv.repository.TicketRepository;
 import com.dbdesign.scv.util.SessionConst;
 import com.dbdesign.scv.util.TestConst;
 import com.dbdesign.scv.util.UserLevel;
@@ -31,6 +33,7 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final AdminRepository adminRepository;
     private final BankAdminRepository bankAdminRepository;
+    private final TicketRepository ticketRepository;
     private final PasswordEncoder passwordEncoder;
 
     // 회원가입
@@ -154,7 +157,7 @@ public class ClientService {
 
     // 회원 탈퇴
     @Transactional
-    public void deleteUser(DeleteUserDTO deleteUserDTO) {
+    public void deleteUser(DeleteUserDTO deleteUserDTO) { // TODO: 상영일정, 티켓 관련 api 작성 이후 테스트해볼 것
 
         Client client = clientRepository.findClientById(deleteUserDTO.getId());
 
@@ -168,6 +171,12 @@ public class ClientService {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
 
+        // ticket 엔티티의 client_id null 처리
+        for (Ticket ticket : ticketRepository.findAllByClientId(client.getId())) {
+            ticket.setClient(null);
+        }
+
+        // client 물리적 삭제
         clientRepository.delete(client);
     }
 
