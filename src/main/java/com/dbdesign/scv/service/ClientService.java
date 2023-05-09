@@ -37,6 +37,18 @@ public class ClientService {
     @Transactional
     public void registerUser(RegisterFormDTO registerFormDTO) {
 
+        // 아이디 중복 체크
+        if (checkLoginIdDuplicate(registerFormDTO.getLoginId())) {
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        }
+
+        // 전화번호, 주민번호 중복 체크
+        for (Client client : clientRepository.findAll()) {
+            if (client.getPhoneNm().equals(registerFormDTO.getPhoneNm()) || passwordEncoder.matches(registerFormDTO.getSecurityNm(), client.getSecurityNm())) {
+                throw new IllegalArgumentException("이미 회원가입된 회원입니다.");
+            }
+        }
+
         Client client = Client.builder()
                 .loginId(registerFormDTO.getLoginId())
                 .password(passwordEncoder.encode(registerFormDTO.getPassword()))
@@ -114,9 +126,23 @@ public class ClientService {
 
         Client client = clientRepository.findClientById(updateUserInfoDTO.getId());
 
-        // 수정활 회원이 존재하지 않는 경우
+        // 수정할 회원이 존재하지 않는 경우
         if (client == null) { // 받은 id 로 회원이 존재하는 지 확인
             throw new IllegalArgumentException("회원이 존재하지 않습니다.");
+        }
+
+        for (Client client1 : clientRepository.findAll()) {
+            if (client1 != client) {
+                // 본인을 제외하고 새로 수정할 로그인 아이디가 중복되는 경우
+                if (client1.getLoginId().equals(updateUserInfoDTO.getNewLoginId())) {
+                    throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+                }
+
+                // 본인을 제외하고 새로 수정할 전화번호가 중복되는 경우
+                if (client1.getPhoneNm().equals(updateUserInfoDTO.getNewPhoneNm())) {
+                    throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
+                }
+            }
         }
 
         client.setLoginId(updateUserInfoDTO.getNewLoginId());
@@ -178,7 +204,7 @@ public class ClientService {
         return clientRepository.findAll().stream().map(ClientDTO::from).collect(Collectors.toList());
     }
 
-
+    // 현재 회원 정보 반환
     public ClientDTO getUserInfo(Client loginMember) {
 
         return ClientDTO.from(loginMember);
