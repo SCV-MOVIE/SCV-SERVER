@@ -142,20 +142,45 @@ public class MovieService {
 
         Genre genre = new Genre();
         genre.setName(genreDTO.getName());
+        genre.setDeleted('N');
 
         genreRepository.save(genre);
     }
 
+    // 장르 리스트 반환
     public List<GenreDTO> genreList() {
 
         List<GenreDTO> genreDTOList = new ArrayList<>();
 
         for (Genre genre : genreRepository.findAll()) {
-            GenreDTO genreDTO = new GenreDTO();
-            genreDTO.setName(genre.getName());
+            if (genre.getDeleted() == 'N') {
+                GenreDTO genreDTO = new GenreDTO();
+                genreDTO.setName(genre.getName());
 
-            genreDTOList.add(genreDTO);
+                genreDTOList.add(genreDTO);
+            }
         }
         return genreDTOList;
+    }
+
+    // 영화 장르 (논리적) 삭제
+    @Transactional
+    public void deleteGenre(String name) {
+
+        Genre genre = genreRepository.findGenreByName(name);
+
+        if (genre == null) { // 받은 name 으로 장르가 존재하는 지 확인
+            throw new IllegalArgumentException("삭제할 장르가 존재하지 않습니다.");
+        }
+
+        for (MovieGenre movieGenre : movieGenreRepository.findAll()) { // 삭제되지 않은 영화 중, 삭제하려는 장르로 매칭된 영화가 존재해도 삭제 불가
+            if (movieGenre.getGenre().getName().equals(name) && movieGenre.getMovie().getDeleted() == 'N') {
+                throw new IllegalArgumentException("이미 해당 장르로 매칭된 영화가 존재합니다.");
+            }
+        }
+
+        // 논리적 삭제
+        genre.setDeleted('Y');
+        genreRepository.save(genre);
     }
 }
