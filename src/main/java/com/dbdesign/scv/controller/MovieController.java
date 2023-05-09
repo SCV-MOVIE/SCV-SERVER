@@ -65,9 +65,18 @@ public class MovieController {
 
     // 영화 장르 조회 (어드민)
     @GetMapping("/genre/list")
-    @ApiOperation(value = "장르 리스트 조회", notes = "영화 관리자는 모든 장르를 조회할 수 있습니다.")
+    @ApiOperation(value = "영화 장르 리스트 조회", notes = "영화 관리자는 모든 장르를 조회할 수 있습니다.")
     public ResponseEntity<List<GenreDTO>> genreList() {
 
         return ResponseEntity.ok().body(movieService.genreList());
+    }
+
+    // 영화 장르 삭제 (논리적 삭제)
+    @PatchMapping("/genre/delete/{name}")
+    @ApiOperation(value = "영화 장르 (논리적) 삭제", notes = "영화 관리자는 장르를 삭제할 수 있습니다.")
+    public ResponseEntity<Void> deleteGenre(@PathVariable String name) {
+
+        movieService.deleteGenre(name);
+        return ResponseEntity.ok().build();
     }
 }
