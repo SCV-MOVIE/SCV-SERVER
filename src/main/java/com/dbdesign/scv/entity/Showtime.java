@@ -22,14 +22,13 @@ public class Showtime {
     @Column(name = "start_date")
     private String startDate;
 
-    private String round;
+    private int round;
 
     @Column(name = "is_public")
     private char isPublic;
 
     @Column(name = "is_sold_out")
     private char isSoldOut;
-    private char deleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
