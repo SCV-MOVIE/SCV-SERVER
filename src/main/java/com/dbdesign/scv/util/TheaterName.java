@@ -1,6 +1,6 @@
 package com.dbdesign.scv.util;
 
-public class TheaterValue {
+public class TheaterName {
 
     public static final String NORMAL = "NORMAL";
     public static final String PREMIUM = "NORMAL";
