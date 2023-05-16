@@ -9,4 +9,6 @@ import java.util.List;
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     List<Seat> findAllByTheater(Theater theater);
+
+    Seat findSeatBySeatNmAndTheater(String seatNm, Theater theater);
 }
