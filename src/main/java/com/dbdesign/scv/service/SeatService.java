@@ -21,9 +21,9 @@ public class SeatService {
     }
 
     // 좌석 여부(예매 여부 반환)
-    public boolean isReserved(Long theaterId, String seatNm) {
+    public boolean isReserved(String theaterId, String seatNm) {
 
-        Theater theater = theaterRepository.findTheaterById(theaterId);
+        Theater theater = theaterRepository.findTheaterById(Long.parseLong(theaterId));
 
         // 상영관이 존재하지 않는 경우
         if (theater == null) { // 받은 id 로 상영관이 존재하는 지 확인

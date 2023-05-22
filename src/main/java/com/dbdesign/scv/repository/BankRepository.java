@@ -1,11 +1,9 @@
 package com.dbdesign.scv.repository;
 
-import com.dbdesign.scv.entity.Genre;
+import com.dbdesign.scv.entity.Bank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface GenreRepository extends JpaRepository<Genre, Long> {
-
-    Genre findGenreByName(String name);
+public interface BankRepository extends JpaRepository<Bank, Long> {
 }
