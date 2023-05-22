@@ -32,7 +32,7 @@ public class TheaterController {
 
     // 상영관 좌석 수와 배치 수정 -> 새로운 상영관 생성 (어드민)
     @PostMapping("/update")
-    @ApiOperation(value = "상영관 좌석 수와 배치 수정 & 새로운 상영관 생성", notes = "기존의 상영관은 이전 기록 조회를 위해 deleted 상태로 바꾸고, 새로운 상영관과 좌석이 만들어진다.")
+    @ApiOperation(value = "상영관 좌석 수와 배치 수정 & 새로운 상영관 생성 (어드민)", notes = "기존의 상영관은 이전 기록 조회를 위해 deleted 상태로 바꾸고, 새로운 상영관과 좌석이 만들어진다.")
     public ResponseEntity<Void> updateTheater(@Validated @RequestBody UpdateTheaterFormDTO updateTheaterFormDTO) {
 
         theaterService.updateTheater(updateTheaterFormDTO);

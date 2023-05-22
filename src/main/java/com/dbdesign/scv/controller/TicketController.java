@@ -64,8 +64,8 @@ public class TicketController {
     }
 
     // 모든 티켓 조회 (어드민)
-    @GetMapping("/admin/list")
-    @ApiOperation(value = "예매 티켓 리스트 조회", notes = "어드민이 아닌 경우, 사용할 수 없는 기능입니다.")
+    @GetMapping("/admin/ticket/list")
+    @ApiOperation(value = "예매 티켓 리스트 조회 (어드민)", notes = "어드민이 아닌 경우, 사용할 수 없는 기능입니다.")
     public ResponseEntity<List<TicketDTO>> showTickets(HttpServletRequest request) {
 
         return ResponseEntity.ok().body(ticketService.showTickets(request));

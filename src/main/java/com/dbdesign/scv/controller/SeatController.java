@@ -20,7 +20,7 @@ public class SeatController {
 
     // 좌석여부를 알려줌 (어드민)
     @GetMapping("/isReserved/{theaterId}/{seatNm}")
-    @ApiOperation(value = "좌석 여부", notes = "boolean 값으로 입력받은 상영관번호와 좌석번호로 예매가 되었는지 알려줍니다. 예매 완료 시 true")
+    @ApiOperation(value = "좌석 여부를 boolean 값으로 알려줌 (어드민)", notes = "boolean 값으로 입력받은 상영관번호와 좌석번호로 예매가 되었는지 알려줍니다. 예매 완료 시 true")
     public ResponseEntity<Boolean> isReserved(@PathVariable String theaterId, @PathVariable String seatNm) {
 
         return ResponseEntity.ok().body(seatService.isReserved(theaterId, seatNm));
