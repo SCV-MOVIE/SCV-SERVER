@@ -39,7 +39,7 @@ public class ClientController {
             name = "loginId"
             , value = "아이디"
             , required = true
-            , dataType = "string"
+            , dataType = "String"
             , paramType = "path"
             , defaultValue = "None"
             , example = "garfield")
