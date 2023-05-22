@@ -215,7 +215,7 @@ public class TicketService {
 
                 // 10%에 해당하는 금액을 포인트로 적립하고 이에 맞는 등급 부여
                 loginMember.setPoint(loginMember.getPoint() - ticketReserveFormDTO.getUsedPoint() + Double.valueOf(ticketReserveFormDTO.getPrice() * 0.1).intValue());
-                loginMember.setMembership(returnUserLevelByAccumulatedPaymentAmount(loginMember));
+                loginMember.setMembership(returnUserLevelByAccumulatedPrintedTicketNm(loginMember));
 
                 clientRepository.save(loginMember);
 
@@ -252,7 +252,7 @@ public class TicketService {
 
                 // 10%에 해당하는 금액을 포인트로 적립하고 이에 맞는 등급 부여
                 loginMember.setPoint(loginMember.getPoint() - ticketReserveFormDTO.getUsedPoint() + Double.valueOf(ticketReserveFormDTO.getPrice() * 0.1).intValue());
-                loginMember.setMembership(returnUserLevelByAccumulatedPaymentAmount(loginMember));
+                loginMember.setMembership(returnUserLevelByAccumulatedPrintedTicketNm(loginMember));
 
                 clientRepository.save(loginMember);
             } else if (ticketReserveFormDTO.getPaymentMethod().equals(PaymentMethod.POINT)) {
@@ -274,7 +274,7 @@ public class TicketService {
 
                 // 10%에 해당하는 금액을 포인트로 적립하고 이에 맞는 등급 부여
                 loginMember.setPoint(loginMember.getPoint() - ticketReserveFormDTO.getUsedPoint() + Double.valueOf(ticketReserveFormDTO.getPrice() * 0.1).intValue());
-                loginMember.setMembership(returnUserLevelByAccumulatedPaymentAmount(loginMember));
+                loginMember.setMembership(returnUserLevelByAccumulatedPrintedTicketNm(loginMember));
 
                 clientRepository.save(loginMember);
             }
@@ -296,16 +296,18 @@ public class TicketService {
     }
 
     // 누적 결제 금액으로 회원 등급 반환
-    public String returnUserLevelByAccumulatedPaymentAmount(Client client) {
-        int accumulatedPaymentAccount = 0;
+    public String returnUserLevelByAccumulatedPrintedTicketNm(Client client) {
+        int accumulatedPrintedTicketNm = 0;
 
         for (Ticket ticket : ticketRepository.findAllByClientId(client.getId())) {
-            accumulatedPaymentAccount += ticket.getPrice();
+            if (ticket.getStatus().equals(TicketStatus.PRINTED)) {
+                accumulatedPrintedTicketNm++;
+            }
         }
 
-        if (accumulatedPaymentAccount < ClientLevel.VIP_LIMIT) {
+        if (accumulatedPrintedTicketNm < ClientLevel.VIP_LIMIT) {
             return UserLevel.COMMON;
-        } else if (accumulatedPaymentAccount < ClientLevel.VVIP_LIMIT) {
+        } else if (accumulatedPrintedTicketNm < ClientLevel.VVIP_LIMIT) {
             return UserLevel.VIP;
         } else {
             return UserLevel.VVIP;
@@ -337,6 +339,7 @@ public class TicketService {
 
         // ticket 의 상태를 CANCELLED 로 수정
         ticket.setStatus(TicketStatus.CANCELLED);
+        ticket.setUpdatedAt(requestDateTime);
         ticketRepository.save(ticket);
 
         // 포인트 반환
@@ -435,7 +438,7 @@ public class TicketService {
         Admin loginAdmin = (Admin) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
 
         if (loginAdmin == null) {
-            throw new IllegalArgumentException("회원이 아닌 경우, 사용할 수 없는 기능입니다.");
+            throw new IllegalArgumentException("어드민이 아닌 경우, 사용할 수 없는 기능입니다.");
         }
 
         List<TicketDTO> ticketDTOList = new ArrayList<>();

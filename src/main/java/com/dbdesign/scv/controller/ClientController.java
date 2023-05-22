@@ -74,9 +74,9 @@ public class ClientController {
         return ResponseEntity.ok().build();
     }
 
-    // 모든 회원 정보 조회 (어드민 기능)
+    // 모든 회원 정보 조회 (어드민)
     @GetMapping("/member/list")
-    @ApiOperation(value = "모든 회원 정보 조회", notes = "모든 회원 정보가 리스트 형태로 반환됩니다.")
+    @ApiOperation(value = "모든 회원 정보 조회 (어드민)", notes = "모든 회원 정보가 리스트 형태로 반환됩니다.")
     public ResponseEntity<List<ClientDTO>> getUserList() {
 
         return ResponseEntity.ok().body(clientService.getUserList());
