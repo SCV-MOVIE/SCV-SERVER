@@ -117,23 +117,31 @@ public class TicketService {
                 paymentRepository.save(payment);
             } else if (ticketReserveFormDTO.getPaymentMethod().equals(PaymentMethod.CARD)) {
 
+                // 카드 결제시 티켓이 결제 상태로 생성된다.
+                ticket.setStatus(TicketStatus.PAYED);
+                ticketRepository.save(ticket);
+
+                String approveNm = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+
                 // 제 3의 서비스에 내역 저장
                 Bank bank = new Bank();
+                bank.setApproveNm(approveNm);
                 bank.setSource(ticketReserveFormDTO.getCardOrAccountNm());
                 bank.setDestination(ScvConst.SCV_ACCOUNT);
                 bank.setPrice(ticketReserveFormDTO.getPrice());
                 bank.setCreatedAt(requestDateTime);
                 bank.setUpdatedAt(requestDateTime);
-                bank.setStatus(BankStatus.STANDBY);
-                bank.setMethod(PaymentMethod.ACCOUNT);
+                bank.setStatus(BankStatus.APPROVED);
+                bank.setMethod(PaymentMethod.CARD);
 
                 bankRepository.save(bank);
 
                 // payment 저장
                 Payment payment = new Payment();
-                payment.setMethod(PaymentMethod.ACCOUNT);
+                payment.setMethod(PaymentMethod.CARD);
                 payment.setBankId(bank.getId().intValue());
                 payment.setTicket(ticket);
+                payment.setApproveNm(approveNm);
                 payment.setPartner(partnerRepository.findPartnerByName(ticketReserveFormDTO.getPartnerName()));
 
                 paymentRepository.save(payment);
@@ -213,14 +221,21 @@ public class TicketService {
 
             } else if (ticketReserveFormDTO.getPaymentMethod().equals(PaymentMethod.CARD)) {
 
+                // 카드 결제시 티켓이 결제 상태로 생성된다.
+                ticket.setStatus(TicketStatus.PAYED);
+                ticketRepository.save(ticket);
+
+                String approveNm = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+
                 // 제 3의 서비스에 내역 저장
                 Bank bank = new Bank();
+                bank.setApproveNm(approveNm);
                 bank.setSource(ticketReserveFormDTO.getCardOrAccountNm());
                 bank.setDestination(ScvConst.SCV_ACCOUNT);
                 bank.setPrice(ticketReserveFormDTO.getPrice());
                 bank.setCreatedAt(requestDateTime);
                 bank.setUpdatedAt(requestDateTime);
-                bank.setStatus(BankStatus.STANDBY);
+                bank.setStatus(BankStatus.APPROVED);
                 bank.setMethod(PaymentMethod.CARD);
 
                 bankRepository.save(bank);
@@ -228,8 +243,9 @@ public class TicketService {
                 // payment 저장
                 Payment payment = new Payment();
                 payment.setMethod(PaymentMethod.CARD);
-                payment.setBankId(1);
+                payment.setBankId(bank.getId().intValue());
                 payment.setTicket(ticket);
+                payment.setApproveNm(approveNm);
                 payment.setPartner(partnerRepository.findPartnerByName(ticketReserveFormDTO.getPartnerName()));
 
                 paymentRepository.save(payment);
