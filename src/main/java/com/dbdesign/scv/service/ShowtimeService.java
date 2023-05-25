@@ -1,12 +1,7 @@
 package com.dbdesign.scv.service;
 
-import com.dbdesign.scv.dto.ShowtimeDTO;
-import com.dbdesign.scv.dto.ShowtimeFormDTO;
-import com.dbdesign.scv.dto.UpdateShowtimeDTO;
-import com.dbdesign.scv.entity.Movie;
-import com.dbdesign.scv.entity.Seat;
-import com.dbdesign.scv.entity.Showtime;
-import com.dbdesign.scv.entity.Theater;
+import com.dbdesign.scv.dto.*;
+import com.dbdesign.scv.entity.*;
 import com.dbdesign.scv.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +22,16 @@ public class ShowtimeService {
     private final TicketRepository ticketRepository;
     private final SeatRepository seatRepository;
     private final TicketSeatRepository ticketSeatRepository;
+    private final MovieGenreRepository movieGenreRepository;
 
-    public ShowtimeService(TheaterRepository theaterRepository, ShowtimeRepository showtimeRepository, MovieRepository movieRepository, TicketRepository ticketRepository, SeatRepository seatRepository, TicketSeatRepository ticketSeatRepository) {
+    public ShowtimeService(TheaterRepository theaterRepository, ShowtimeRepository showtimeRepository, MovieRepository movieRepository, TicketRepository ticketRepository, SeatRepository seatRepository, TicketSeatRepository ticketSeatRepository, MovieGenreRepository movieGenreRepository) {
         this.theaterRepository = theaterRepository;
         this.showtimeRepository = showtimeRepository;
         this.movieRepository = movieRepository;
         this.ticketRepository = ticketRepository;
         this.seatRepository = seatRepository;
         this.ticketSeatRepository = ticketSeatRepository;
+        this.movieGenreRepository = movieGenreRepository;
     }
 
     // 상영일정 등록
@@ -196,7 +193,17 @@ public class ShowtimeService {
             ShowtimeDTO showtimeDTO = ShowtimeDTO.from(showtime);
             showtimeDTO.setRemainSeatNm(remainedSeatNm);
             showtimeDTO.setTheaterSize(seatRepository.findAllByTheater(showtime.getTheater()).size());
-            showtimeDTO.setMovieName(showtime.getMovie().getName());
+
+            // 서비스 단에서 MovieDTO 에 Genre 추가
+            List<GenreDTO> genreDTOList = new ArrayList<>();
+            for (MovieGenre movieGenre : movieGenreRepository.findMovieGenresByMovie(showtime.getMovie())) {
+                GenreDTO genreDTO = new GenreDTO();
+                genreDTO.setName(movieGenre.getGenre().getName());
+
+                genreDTOList.add(genreDTO);
+            }
+
+            showtimeDTO.getMovieDTO().setGenreDTOList(genreDTOList); // 서비스 단에서 주입
             showtimeDTO.setTheaterName(showtime.getTheater().getName());
 
             showtimeDTOList.add(showtimeDTO);
@@ -226,7 +233,18 @@ public class ShowtimeService {
                 ShowtimeDTO showtimeDTO = ShowtimeDTO.from(showtime);
                 showtimeDTO.setRemainSeatNm(remainedSeatNm);
                 showtimeDTO.setTheaterSize(seatRepository.findAllByTheater(showtime.getTheater()).size()); // 상영관으로 모든 좌석을 가져와서 크기를 넣음
-                showtimeDTO.setMovieName(showtime.getMovie().getName());
+
+                // 서비스 단에서 MovieDTO 에 Genre 추가
+                List<GenreDTO> genreDTOList = new ArrayList<>();
+                for (MovieGenre movieGenre : movieGenreRepository.findMovieGenresByMovie(showtime.getMovie())) {
+                    GenreDTO genreDTO = new GenreDTO();
+                    genreDTO.setName(movieGenre.getGenre().getName());
+
+                    genreDTOList.add(genreDTO);
+                }
+
+                showtimeDTO.getMovieDTO().setGenreDTOList(genreDTOList); // 서비스 단에서 주입
+
                 showtimeDTO.setTheaterName(showtime.getTheater().getName());
 
                 showtimeDTOList.add(showtimeDTO);

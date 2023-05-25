@@ -68,9 +68,9 @@ public class ClientController {
     // 회원 탈퇴
     @PatchMapping("/member/withdrawal")
     @ApiOperation(value = "회원 탈퇴", notes = "비밀번호 일치 시 회원 탈퇴가 가능합니다.")
-    public ResponseEntity<Void> deleteUser(@RequestBody DeleteUserDTO deleteUserDTO) {
+    public ResponseEntity<Void> deleteUser(@RequestBody DeleteClientDTO deleteClientDTO) {
 
-        clientService.deleteUser(deleteUserDTO);
+        clientService.deleteUser(deleteClientDTO);
         return ResponseEntity.ok().build();
     }
 
@@ -82,11 +82,19 @@ public class ClientController {
         return ResponseEntity.ok().body(clientService.getUserList());
     }
 
-    // 현재 유저 정보 조회
+    // 로그인된 유저 정보 조회
     @GetMapping("/member/info")
-    @ApiOperation(value = "현재 회원 정보 조회", notes = "현재 회원 정보가 반환됩니다.")
+    @ApiOperation(value = "현재 로그인된 회원 정보 조회", notes = "현재 로그인된 회원 정보가 반환됩니다. 로그인된 회원이 없을 경우, 500 에러를 뱉습니다.")
     public ResponseEntity<ClientDTO> getUserInfo(@ApiIgnore @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) Client loginMember) {
 
         return ResponseEntity.ok().body(clientService.getUserInfo(loginMember));
+    }
+
+    // 로그인된 유저가 있는 지 여부 반환
+    @GetMapping("/member/isLogin")
+    @ApiOperation(value = "로그인된 유저가 있는 지 여부 반환", notes = "로그인된 회원이 있으면 true를 반환합니다.")
+    public ResponseEntity<?> isMemberLogin(@ApiIgnore @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) Client loginMember) {
+
+        return ResponseEntity.ok().body(clientService.isMemberLogin(loginMember));
     }
 }

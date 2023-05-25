@@ -6,10 +6,9 @@ import com.dbdesign.scv.service.TheaterService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/theater")
@@ -21,9 +20,9 @@ public class TheaterController {
         this.theaterService = theaterService;
     }
 
-    // 상영관 등록
+    // 상영관 등록 (어드민)
     @PostMapping
-    @ApiOperation(value = "새로운 상영관 생성", notes = "행, 열, 이름, 테마를 입력받아 새로운 좌석과 상영관을 생성합니다.")
+    @ApiOperation(value = "새로운 상영관 생성 (어드민)", notes = "행, 열, 이름, 테마를 입력받아 새로운 좌석과 상영관을 생성합니다.")
     public ResponseEntity<Void> makeTheater(@Validated @RequestBody TheaterFormDTO theaterFormDTO) {
 
         theaterService.makeTheater(theaterFormDTO);
@@ -36,6 +35,15 @@ public class TheaterController {
     public ResponseEntity<Void> updateTheater(@Validated @RequestBody UpdateTheaterFormDTO updateTheaterFormDTO) {
 
         theaterService.updateTheater(updateTheaterFormDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    // 상영관 삭제 (어드민)
+    @PatchMapping("/delete/{theaterId}")
+    @ApiOperation(value = "상영관 삭제 (어드민)", notes = "관리자가 상영관을 삭제하면 물리적 삭제가 아닌 논리적인 U만 일어난다. 이때 삭제는 상영일정이 공개되지 않아 예매된 티켓이 없어야 한다.")
+    public ResponseEntity<Void> deleteTheater(@PathVariable String theaterId) {
+
+        theaterService.deleteTheater(theaterId);
         return ResponseEntity.ok().build();
     }
 }

@@ -88,12 +88,24 @@ public class MovieService {
         movie.setDirector(updateMovieDTO.getNewDirector());
         movie.setIntroduction(updateMovieDTO.getNewIntroduction());
         movie.setDistributor(updateMovieDTO.getNewDistributor());
-        movie.setImgUrl(updateMovieDTO.getNewImageUrl());
+        movie.setImgUrl(updateMovieDTO.getNewImgUrl());
         movie.setActor(updateMovieDTO.getNewActor());
         movie.setStaff(updateMovieDTO.getNewStaff());
-        //TODO: 장르도 변경 가능하게 할 것인지
 
         movieRepository.save(movie);
+
+        // movie_genre 갱신 (장르 갱신)
+        movieGenreRepository.deleteMovieGenresByMovie(movie);
+
+        for (GenreDTO genreDTO : updateMovieDTO.getGenreDTOList()) {
+            Genre newGenre = genreRepository.findGenreByName(genreDTO.getName());
+            MovieGenre movieGenre = new MovieGenre();
+
+            movieGenre.setMovie(movie);
+            movieGenre.setGenre(newGenre);
+
+            movieGenreRepository.save(movieGenre);
+        }
     }
 
     // 영화 삭제

@@ -3,14 +3,8 @@ package com.dbdesign.scv.service;
 import com.dbdesign.scv.dto.BankDTO;
 import com.dbdesign.scv.dto.HandleTicketDTO;
 import com.dbdesign.scv.entity.*;
-import com.dbdesign.scv.repository.BankRepository;
-import com.dbdesign.scv.repository.ClientRepository;
-import com.dbdesign.scv.repository.PaymentRepository;
-import com.dbdesign.scv.repository.TicketRepository;
-import com.dbdesign.scv.util.BankMethod;
-import com.dbdesign.scv.util.BankStatus;
-import com.dbdesign.scv.util.SessionConst;
-import com.dbdesign.scv.util.TicketStatus;
+import com.dbdesign.scv.repository.*;
+import com.dbdesign.scv.util.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +22,14 @@ public class BankService {
     private final PaymentRepository paymentRepository;
     private final ClientRepository clientRepository;
     private final TicketRepository ticketRepository;
+    private final TicketSeatRepository ticketSeatRepository;
 
-    public BankService(BankRepository bankRepository, PaymentRepository paymentRepository, ClientRepository clientRepository, TicketRepository ticketRepository) {
+    public BankService(BankRepository bankRepository, PaymentRepository paymentRepository, ClientRepository clientRepository, TicketRepository ticketRepository, TicketSeatRepository ticketSeatRepository) {
         this.bankRepository = bankRepository;
         this.paymentRepository = paymentRepository;
         this.clientRepository = clientRepository;
         this.ticketRepository = ticketRepository;
+        this.ticketSeatRepository = ticketSeatRepository;
     }
 
     // 계좌 이체 요청에 대한 승인 또는 거절 (뱅크 어드민)
@@ -96,15 +92,26 @@ public class BankService {
                 throw new IllegalArgumentException("거절할 결제 내역(Payment)이 없습니다.");
             }
 
-            // ticket 상태를 PAYED 로 저장
+            // ticket 상태를 REJECTED 로 저장
             Ticket ticket = payment.getTicket();
             ticket.setStatus(TicketStatus.REJECTED);
             ticket.setUpdatedAt(requestDateTime);
             ticketRepository.save(ticket);
 
+            // ticket_seat 에서 row 삭제
+            ticketSeatRepository.deleteAllByTicket(ticket);
+
             // 포인트로 환급
             Client client = payment.getTicket().getClient();
-            int refundedPoint = payment.getTicket().getPrice();
+
+            int refundedPoint = 0;
+
+            // 거절한 결제 방식이 ACCOUNT 인 경우, 사용한 point 만 환급
+            if (payment.getMethod().equals(PaymentMethod.ACCOUNT)) {
+                refundedPoint = payment.getTicket().getUsedPoint();
+            } else { // 거절한 결제 방식이 CARD
+                refundedPoint = payment.getTicket().getPrice();
+            }
 
             client.setPoint(client.getPoint() + refundedPoint);
             clientRepository.save(client);

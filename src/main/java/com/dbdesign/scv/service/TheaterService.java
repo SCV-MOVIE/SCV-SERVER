@@ -152,4 +152,26 @@ public class TheaterService {
         // 폼에서 받은 데이터로 seat 생성
         createSeats(theaterFormDTO.getRow(), theaterFormDTO.getColumn(), newTheater);
     }
+
+    // 상영관 삭제 (논리적)
+    @Transactional
+    public void deleteTheater(String theaterId) {
+
+        Theater theater = theaterRepository.findTheaterById(Long.valueOf(theaterId));
+
+        if (theater == null) {
+            throw new IllegalArgumentException("삭제할 상영관이 존재하지 않습니다.");
+        }
+
+        // 관리자가 상영관을 삭제하면 물리적 삭제가 아닌 논리적인 U만 일어난다. 이때 삭제는 상영일정이 공개되지 않아 예매된 티켓이 없어야 한다.
+        for (Showtime showtime : showtimeRepository.findAllByTheater(theater)) {
+            if (showtime.getIsPublic() == 'Y') {
+                throw new IllegalArgumentException("공개된 상영일정이 있어 상영관을 삭제할 수 없습니다.");
+            }
+        }
+
+        // 논리적 삭제
+        theater.setDeleted('Y');
+        theaterRepository.save(theater);
+    }
 }
