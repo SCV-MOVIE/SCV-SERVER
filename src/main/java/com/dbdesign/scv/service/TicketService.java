@@ -316,7 +316,7 @@ public class TicketService {
 
     // 티켓 취소
     @Transactional
-    public void cancelTicket(String ticketId) {
+    public void cancelTicket(String ticketId) { // TODO: ticket_seat에서 삭제할 것 + is_sold_out 갱신
 
         // 영화가 상영되지 않았으면 취소가 가능
         String requestDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -341,6 +341,9 @@ public class TicketService {
         ticket.setStatus(TicketStatus.CANCELLED);
         ticket.setUpdatedAt(requestDateTime);
         ticketRepository.save(ticket);
+
+        // ticket_seat 에서 row 삭제
+        ticketSeatRepository.deleteAllByTicket(ticket);
 
         // 포인트 반환
         Client client = ticket.getClient();

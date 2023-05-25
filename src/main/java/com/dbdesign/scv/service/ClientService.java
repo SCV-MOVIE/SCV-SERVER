@@ -157,9 +157,9 @@ public class ClientService {
 
     // 회원 탈퇴
     @Transactional
-    public void deleteUser(DeleteUserDTO deleteUserDTO) { // TODO: 상영일정, 티켓 관련 api 작성 이후 테스트해볼 것
+    public void deleteUser(DeleteClientDTO deleteClientDTO) { // TODO: 상영일정, 티켓 관련 api 작성 이후 테스트해볼 것
 
-        Client client = clientRepository.findClientById(deleteUserDTO.getId());
+        Client client = clientRepository.findClientById(deleteClientDTO.getId());
 
         // 탈퇴할 회원이 존재하지 않는 경우
         if (client == null) { // 받은 id 로 회원이 존재하는 지 확인
@@ -167,7 +167,7 @@ public class ClientService {
         }
 
         // 비밀번호 틀릴 시
-        if (!passwordEncoder.matches(deleteUserDTO.getPassword(), client.getPassword())) {
+        if (!passwordEncoder.matches(deleteClientDTO.getPassword(), client.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
 
@@ -216,6 +216,20 @@ public class ClientService {
     // 현재 회원 정보 반환
     public ClientDTO getUserInfo(Client loginMember) {
 
+        if (loginMember == null) {
+            throw new IllegalStateException("로그인된 유저가 없습니다.");
+        }
+
         return ClientDTO.from(loginMember);
+    }
+
+    // 현재 로그인된 멤버가 있는 여부 반환
+    public boolean isMemberLogin(Client loginMember) {
+
+        if (loginMember == null) {
+            return false;
+        }
+
+        return true;
     }
 }

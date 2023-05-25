@@ -3,7 +3,6 @@ package com.dbdesign.scv.controller;
 import com.dbdesign.scv.dto.ShowtimeDTO;
 import com.dbdesign.scv.dto.ShowtimeFormDTO;
 import com.dbdesign.scv.dto.UpdateShowtimeDTO;
-import com.dbdesign.scv.entity.Showtime;
 import com.dbdesign.scv.service.ShowtimeService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;

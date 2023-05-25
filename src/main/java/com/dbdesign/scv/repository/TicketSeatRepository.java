@@ -14,4 +14,6 @@ public interface TicketSeatRepository extends JpaRepository<TicketSeat, Long> {
     boolean existsBySeat(Seat seat);
 
     List<TicketSeat> findAllByTicket(Ticket ticket);
+
+    void deleteAllByTicket(Ticket ticket);
 }
