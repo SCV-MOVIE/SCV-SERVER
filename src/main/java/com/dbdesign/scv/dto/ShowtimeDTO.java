@@ -35,6 +35,9 @@ public class ShowtimeDTO {
     @ApiModelProperty(value = "상영관 이름", example = "1관", required = true)
     private String theaterName;
 
+    @ApiModelProperty(value = "상영관 타입", example = "NORMAL", required = true)
+    private String theaterType;
+
     public static ShowtimeDTO from(Showtime entity) {
 
         return ShowtimeDTO.builder()
@@ -46,6 +49,7 @@ public class ShowtimeDTO {
                 .theaterSize(0) // service에서 채울 예정
                 .movieDTO(MovieDTO.from(entity.getMovie())) // service에서 movie의 장르를 채울 예정
                 .theaterName("") // service에서 채울 예정
+                .theaterType(entity.getTheater().getTheaterType().getName())
                 .build();
     }
 }
