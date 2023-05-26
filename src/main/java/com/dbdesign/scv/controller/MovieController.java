@@ -2,6 +2,7 @@ package com.dbdesign.scv.controller;
 
 import com.dbdesign.scv.dto.*;
 import com.dbdesign.scv.service.MovieService;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,6 +75,14 @@ public class MovieController {
     // 영화 장르 삭제 (논리적 삭제, 어드민)
     @PatchMapping("/genre/delete/{name}")
     @ApiOperation(value = "영화 장르 (논리적) 삭제 (어드민)", notes = "영화 관리자는 장르를 삭제할 수 있습니다.")
+    @ApiImplicitParam(
+            name = "name"
+            , value = "영화 장르 이름"
+            , required = true
+            , dataType = "String"
+            , paramType = "path"
+            , defaultValue = "None"
+            , example = "horror")
     public ResponseEntity<Void> deleteGenre(@PathVariable String name) {
 
         movieService.deleteGenre(name);
