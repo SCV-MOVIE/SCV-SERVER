@@ -4,6 +4,7 @@ import com.dbdesign.scv.dto.TicketCheckFormDTO;
 import com.dbdesign.scv.dto.TicketDTO;
 import com.dbdesign.scv.dto.TicketReserveFormDTO;
 import com.dbdesign.scv.service.TicketService;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,14 @@ public class TicketController {
     // 티켓 취소
     @PatchMapping("/cancel/{ticketId}")
     @ApiOperation(value = "티켓 취소", notes = "영화가 상영되지 않았으면 취소가 가능합니다. 취소가 되면 티켓의 금액이 포인트로 전환됩니다.")
+    @ApiImplicitParam(
+            name = "ticketId"
+            , value = "티켓 id(Primary Key)"
+            , required = true
+            , dataType = "Long"
+            , paramType = "path"
+            , defaultValue = "None"
+            , example = "1")
     public ResponseEntity<Void> cancelTicket(@PathVariable String ticketId) {
 
         ticketService.cancelTicket(ticketId);
@@ -42,6 +51,14 @@ public class TicketController {
     // 예매번호로 티켓 조회
     @GetMapping("/check-by/reserveNm/{reserveNm}")
     @ApiOperation(value = "예매번호로 티켓 조회", notes = "16자리 예매번호로 티켓을 조회합니다.")
+    @ApiImplicitParam(
+            name = "reserveNm"
+            , value = "예매 번호"
+            , required = true
+            , dataType = "String"
+            , paramType = "path"
+            , defaultValue = "None"
+            , example = "16자리 스트링 값")
     public ResponseEntity<TicketDTO> checkTicketByReserveNm(@PathVariable String reserveNm) {
 
         return ResponseEntity.ok().body(ticketService.checkTicketByReserveNm(reserveNm));
@@ -74,6 +91,14 @@ public class TicketController {
     // 티켓 출력하기
     @PatchMapping("/print/{ticketId}")
     @ApiOperation(value = "티켓 출력", notes = "발권시 티켓이 PRINTED 상태로 변하며 PAYED 상태가 아닌 경우 티켓 발권은 불가능합니다.")
+    @ApiImplicitParam(
+            name = "ticketId"
+            , value = "티켓 id(Primary Key)"
+            , required = true
+            , dataType = "Long"
+            , paramType = "path"
+            , defaultValue = "None"
+            , example = "1")
     public ResponseEntity<Void> printTicket(@PathVariable String ticketId) {
 
         ticketService.printTicket(ticketId);

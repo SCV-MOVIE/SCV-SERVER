@@ -3,12 +3,11 @@ package com.dbdesign.scv.controller;
 import com.dbdesign.scv.dto.TheaterFormDTO;
 import com.dbdesign.scv.dto.UpdateTheaterFormDTO;
 import com.dbdesign.scv.service.TheaterService;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/theater")
@@ -41,6 +40,14 @@ public class TheaterController {
     // 상영관 삭제 (어드민)
     @PatchMapping("/delete/{theaterId}")
     @ApiOperation(value = "상영관 삭제 (어드민)", notes = "관리자가 상영관을 삭제하면 물리적 삭제가 아닌 논리적인 U만 일어난다. 이때 삭제는 상영일정이 공개되지 않아 예매된 티켓이 없어야 한다.")
+    @ApiImplicitParam(
+            name = "theaterId"
+            , value = "상영관 id(Primary Key)"
+            , required = true
+            , dataType = "Long"
+            , paramType = "path"
+            , defaultValue = "None"
+            , example = "1")
     public ResponseEntity<Void> deleteTheater(@PathVariable String theaterId) {
 
         theaterService.deleteTheater(theaterId);

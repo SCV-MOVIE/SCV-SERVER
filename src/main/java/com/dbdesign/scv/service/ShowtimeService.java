@@ -1,6 +1,9 @@
 package com.dbdesign.scv.service;
 
-import com.dbdesign.scv.dto.*;
+import com.dbdesign.scv.dto.GenreDTO;
+import com.dbdesign.scv.dto.ShowtimeDTO;
+import com.dbdesign.scv.dto.ShowtimeFormDTO;
+import com.dbdesign.scv.dto.UpdateShowtimeDTO;
 import com.dbdesign.scv.entity.*;
 import com.dbdesign.scv.repository.*;
 import org.springframework.stereotype.Service;
@@ -8,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -113,8 +119,29 @@ public class ShowtimeService {
             throw new IllegalArgumentException("이미 공개된 상영일정입니다.");
         }
 
-        showtime.setIsPublic('Y');
+        /*
+          입력된 회차가 1이면 바로 공개
 
+          영화의 상영 일정을 가져와 가장 큰 회차 번호(maxRound)를 찾는다.
+          그리고 현재 상영 일정의 회차 번호가 maxRound + 1과 같은지 확인.
+          같지 않다면 예외를 던지고, 같다면 상영 일정을 공개로 설정.
+         */
+        if (showtime.getRound() > 1) {
+            List<Showtime> showtimeList = showtimeRepository.findAllByMovie(showtime.getMovie());
+            int maxRound = 0;
+
+            for (Showtime item : showtimeList) {
+                if (item.getRound() > maxRound) {
+                    maxRound = item.getRound();
+                }
+            }
+
+            if (showtime.getRound() != maxRound + 1) {
+                throw new IllegalArgumentException("입력하신 상영 일정의 회차의 순서가 맞지 않습니다.");
+            }
+        }
+
+        showtime.setIsPublic('Y');
         showtimeRepository.save(showtime);
     }
 
@@ -252,5 +279,48 @@ public class ShowtimeService {
         }
 
         return showtimeDTOList;
+    }
+
+    // 상영 일정의 시작 시간 추천 (yyyy-MM-dd HH:mm)
+    public String suggestStartDateTime(String movieId) {
+
+        Movie movie = movieRepository.findMovieById(Long.valueOf(movieId));
+
+        // 영화가 존재하지 않는 경우
+        if (movie == null) {
+            throw new IllegalArgumentException("영화가 존재하지 않습니다.");
+        }
+
+        List<Showtime> showtimeList = showtimeRepository.findAllByMovie(movie);
+
+        LocalDateTime latestStartDateTime = null;
+
+        for (Showtime showtime : showtimeList) {
+            // public 상영 일정인지 확인
+            if (showtime.getIsPublic() == 'Y') {
+                LocalDateTime startDateTime = LocalDateTime.parse(showtime.getStartDate());
+                int movieLength = movie.getLength();
+
+                // 시작 시간 추천 계산
+                LocalDateTime suggestedStartDateTime = startDateTime.plusMinutes(movieLength).plusMinutes(20);
+
+                if (latestStartDateTime == null || suggestedStartDateTime.isAfter(latestStartDateTime)) {
+                    latestStartDateTime = suggestedStartDateTime;
+                }
+            }
+        }
+
+        // 공개된 상영 일정이 없는 경우, 요청 날짜의 다음 날짜 오전 10시로 추천
+        if (latestStartDateTime == null) {
+            // 요청 시간의 다음 날짜의 오전 10시로 변경
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            LocalDateTime startDateTime = currentDateTime.toLocalDate().plusDays(1).atTime(10, 0);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            return startDateTime.format(formatter);
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        return latestStartDateTime.format(formatter);
     }
 }
