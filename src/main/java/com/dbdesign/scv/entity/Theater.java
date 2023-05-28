@@ -23,7 +23,7 @@ public class Theater {
     private String name;
     private char deleted;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theater_type_id")
     private TheaterType theaterType;
 }
