@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -322,5 +321,27 @@ public class ShowtimeService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return latestStartDateTime.format(formatter);
+    }
+
+    // 예약된 좌석의 seat_nm을 리스트로 반환
+    public List<String> reservedSeatList(String showtimeId) {
+
+        Showtime showtime = showtimeRepository.findShowtimeById(Long.valueOf(showtimeId));
+
+        // 상영일정이 존재하지 않는 경우
+        if (showtime == null) { // 받은 id 로 상영일정이 존재하는 지 확인
+            throw new IllegalArgumentException("상영일정이 존재하지 않습니다.");
+        }
+
+        List<String> reservedSeatList = new ArrayList<>();
+
+        // for 문을 돌며 상영일정의 상영관으로 모든 좌석을 가져와 ticket_seat 테이블을 참조하여 있으면 reservedSeatList 에 해당 좌석의 seat_nm 저장
+        for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
+            if (ticketSeatRepository.existsBySeat(seat)) {
+                reservedSeatList.add(seat.getSeatNm());
+            }
+        }
+
+        return reservedSeatList;
     }
 }

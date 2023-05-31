@@ -106,4 +106,20 @@ public class ShowtimeController {
 
         return ResponseEntity.ok().body(showtimeService.suggestStartDateTime(movieId));
     }
+
+    // 예약된 좌석의 seat_nm을 리스트로 반환 (어드민)
+    @GetMapping("/reservedSeat/list/{showtimeId}")
+    @ApiOperation(value = "예약된 좌석의 seat_nm을 리스트로 반환 (어드민)", notes = "showtimeId를 매개변수로 받아 예약된 좌석의 리스트를 반환합니다.")
+    @ApiImplicitParam(
+            name = "showtimeId"
+            , value = "상영 일정 id(Primary Key)"
+            , required = true
+            , dataType = "Long"
+            , paramType = "path"
+            , defaultValue = "None"
+            , example = "1")
+    public ResponseEntity<List<String>> reservedSeatList(@PathVariable String showtimeId) {
+
+        return ResponseEntity.ok().body(showtimeService.reservedSeatList(showtimeId));
+    }
 }
