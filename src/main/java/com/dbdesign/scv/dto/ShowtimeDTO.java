@@ -38,6 +38,9 @@ public class ShowtimeDTO {
     @ApiModelProperty(value = "상영관 타입", example = "NORMAL", required = true)
     private String theaterType;
 
+    @ApiModelProperty(value = "상영관 레이아웃", example = "10x10", required = true)
+    private String theaterLayout;
+
     public static ShowtimeDTO from(Showtime entity) {
 
         return ShowtimeDTO.builder()
@@ -50,6 +53,7 @@ public class ShowtimeDTO {
                 .movieDTO(MovieDTO.from(entity.getMovie())) // service에서 movie의 장르를 채울 예정
                 .theaterName("") // service에서 채울 예정
                 .theaterType(entity.getTheater().getTheaterType().getName())
+                .theaterLayout(entity.getTheater().getLayout())
                 .build();
     }
 }
