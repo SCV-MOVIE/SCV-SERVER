@@ -21,7 +21,7 @@ public class ShowtimeDTO {
     private int round;
 
     @ApiModelProperty(value = "공개 여부", example = "Y", required = true)
-    private int isPublic;
+    private char isPublic;
 
     @ApiModelProperty(value = "남은 좌석 수", example = "150", required = true)
     private int remainSeatNm; // 남은 좌석 수

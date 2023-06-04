@@ -32,11 +32,6 @@ public class SeatService {
 
         Seat seat = seatRepository.findSeatBySeatNmAndTheater(seatNm, theater);
 
-        // 상영관에 매개변수로 받은 좌석번호로 좌석이 존재하지 않는 경우
-        if (seat == null) { // 받은 id 로 좌석이 존재하는 지 확인
-            throw new IllegalArgumentException("좌석이 존재하지 않습니다.");
-        }
-
         return ticketSeatRepository.existsBySeat(seat);
     }
 }

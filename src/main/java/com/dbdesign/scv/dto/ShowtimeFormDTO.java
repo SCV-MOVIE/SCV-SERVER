@@ -10,11 +10,9 @@ import javax.validation.constraints.NotBlank;
 @Getter
 public class ShowtimeFormDTO { // 상영일정 등록 폼
 
-    @NotBlank(message = "영화번호(Primary Key) 기입해주세요.")
     @ApiModelProperty(value = "영화번호", example = "1", required = true)
     private int movieId;
 
-    @NotBlank(message = "상영관번호(Primary Key) 기입해주세요.")
     @ApiModelProperty(value = "상영관번호", example = "1", required = true)
     private int theaterId;
 
@@ -22,7 +20,6 @@ public class ShowtimeFormDTO { // 상영일정 등록 폼
     @ApiModelProperty(value = "상영일", example = "2023-01-01", required = true)
     private String startDate;
 
-    @NotBlank(message = "상영회차를 기입해주세요.")
     @ApiModelProperty(value = "상영회차", example = "1", required = true)
     private int round;
 
