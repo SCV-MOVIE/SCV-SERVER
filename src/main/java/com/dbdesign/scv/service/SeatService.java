@@ -30,6 +30,19 @@ public class SeatService {
             throw new IllegalArgumentException("상영관이 존재하지 않습니다.");
         }
 
+        int targetLength = 4; // 목표하는 길이
+
+        if (seatNm.length() < targetLength) {
+            int paddingLength = targetLength - seatNm.length();
+            StringBuilder paddedSeatNm = new StringBuilder(seatNm);
+
+            for (int i = 0; i < paddingLength; i++) {
+                paddedSeatNm.append(' '); // 공백 추가
+            }
+
+            seatNm = paddedSeatNm.toString();
+        }
+
         Seat seat = seatRepository.findSeatBySeatNmAndTheater(seatNm, theater);
 
         return ticketSeatRepository.existsBySeat(seat);

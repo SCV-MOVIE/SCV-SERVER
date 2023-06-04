@@ -73,12 +73,20 @@ public class BankAdminService {
     @Transactional
     public void handleTicket(HandleTicketDTO handleTicketDTO) {
 
-        String requestDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        String requestDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         Bank bank = bankRepository.findBankById((long) handleTicketDTO.getBankId());
 
         if (bank == null) {
             throw new IllegalArgumentException("승인 혹은 거절할 결제 내역이 없습니다.");
+        }
+
+        if (!bank.getStatus().equals(BankStatus.STANDBY)) {
+            throw new IllegalArgumentException("승인 혹은 거절할 수 없는 결제 내역입니다.");
+        }
+
+        if (handleTicketDTO.getStatus().equals(BankStatus.STANDBY)) {
+            throw new IllegalArgumentException("이미 승인 대기 중인 결제 내역입니다.");
         }
 
         // 승인(계좌이체) -> 계좌이체의 경우, 은행으로부터 승인 번호를 발급받아야 하므로 승인번호 생성
@@ -157,7 +165,7 @@ public class BankAdminService {
 
             // 서비스 단에서 넣을 것 주입
             BankDTO bankDTO = BankDTO.from(bank);
-            if (!bank.getApproveNm().isEmpty()) {
+            if (bank.getApproveNm() != null) {
                 bankDTO.setApproveNm(bank.getApproveNm());
             }
 

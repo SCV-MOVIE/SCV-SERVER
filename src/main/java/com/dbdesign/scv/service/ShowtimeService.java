@@ -403,7 +403,7 @@ public class ShowtimeService {
         // for 문을 돌며 상영일정의 상영관으로 모든 좌석을 가져와 ticket_seat 테이블을 참조하여 있으면 reservedSeatList 에 해당 좌석의 seat_nm 저장
         for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
             if (ticketSeatRepository.existsBySeat(seat)) {
-                reservedSeatList.add(seat.getSeatNm());
+                reservedSeatList.add(seat.getSeatNm().trim());
             }
         }
 

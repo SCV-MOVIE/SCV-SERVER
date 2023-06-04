@@ -65,7 +65,7 @@ public class TicketController {
     }
 
     // 개인 정보로 티켓 리스트 조회 (회원에게는 불필요한 기능)
-    @GetMapping("/check-by/info")
+    @PostMapping("/check-by/info")
     @ApiOperation(value = "개인 정보로 티켓 리스트 조회 (회원에게는 불필요한 기능)", notes = "이름, 주민번호, 핸드폰 번호로 티켓 리스트를 조회합니다.")
     public ResponseEntity<List<TicketDTO>> checkTicketByInfo(@RequestBody TicketCheckFormDTO ticketCheckFormDTO) {
 

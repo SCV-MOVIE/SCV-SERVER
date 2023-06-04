@@ -83,7 +83,22 @@ public class TicketService {
 
             // ticket_seat 에 내역 저장
             for (SeatDTO seatDTO : ticketReserveFormDTO.getSeats()) {
-                Seat seat = seatRepository.findSeatBySeatNmAndTheater(seatDTO.getSeatNm(), theaterRepository.findTheaterById((long) seatDTO.getTheaterId()));
+
+                String seatNm = seatDTO.getSeatNm();
+                int targetLength = 4; // 목표하는 길이
+
+                if (seatNm.length() < targetLength) {
+                    int paddingLength = targetLength - seatNm.length();
+                    StringBuilder paddedSeatNm = new StringBuilder(seatNm);
+
+                    for (int i = 0; i < paddingLength; i++) {
+                        paddedSeatNm.append(' '); // 공백 추가
+                    }
+
+                    seatNm = paddedSeatNm.toString();
+                }
+
+                Seat seat = seatRepository.findSeatBySeatNmAndTheater(seatNm, theaterRepository.findTheaterById((long) seatDTO.getTheaterId()));
 
                 TicketSeat ticketSeat = new TicketSeat();
                 ticketSeat.setSeat(seat);
@@ -161,7 +176,12 @@ public class TicketService {
                 showtimeRepository.save(showtime);
             }
         } else { // 회원인 경우
-            Client loginMember = (Client) session.getAttribute(SessionConst.LOGIN_MEMBER);
+            Client loginMember;
+            try {
+                loginMember = (Client) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("로그인하지 않은 경우, 사용할 수 없는 기능입니다.");
+            }
 
             // showtime 찾아서 ticket 저장
             Showtime showtime = showtimeRepository.findShowtimeById((long) ticketReserveFormDTO.getShowtimeId());
@@ -180,7 +200,22 @@ public class TicketService {
 
             // ticket_seat 에 내역 저장
             for (SeatDTO seatDTO : ticketReserveFormDTO.getSeats()) {
-                Seat seat = seatRepository.findSeatBySeatNmAndTheater(seatDTO.getSeatNm(), theaterRepository.findTheaterById((long) seatDTO.getTheaterId()));
+
+                String seatNm = seatDTO.getSeatNm();
+                int targetLength = 4; // 목표하는 길이
+
+                if (seatNm.length() < targetLength) {
+                    int paddingLength = targetLength - seatNm.length();
+                    StringBuilder paddedSeatNm = new StringBuilder(seatNm);
+
+                    for (int i = 0; i < paddingLength; i++) {
+                        paddedSeatNm.append(' '); // 공백 추가
+                    }
+
+                    seatNm = paddedSeatNm.toString();
+                }
+
+                Seat seat = seatRepository.findSeatBySeatNmAndTheater(seatNm, showtime.getTheater());
 
                 TicketSeat ticketSeat = new TicketSeat();
                 ticketSeat.setSeat(seat);
@@ -319,7 +354,7 @@ public class TicketService {
     public void cancelTicket(String ticketId) {
 
         // 영화가 상영되지 않았으면 취소가 가능
-        String requestDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        String requestDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         Ticket ticket = ticketRepository.findTicketById(Long.valueOf(ticketId));
 
@@ -327,10 +362,14 @@ public class TicketService {
             throw new IllegalArgumentException("취소할 티켓이 존재하지 않습니다.");
         }
 
+        if (ticket.getStatus().equals(TicketStatus.CANCELLED)) {
+            throw new IllegalArgumentException("이미 취소된 티켓입니다.");
+        }
+
         // startDate 형식 -> yyyy-MM-dd HH:mm
         String startDate = ticket.getShowtime().getStartDate();
 
-        LocalDateTime requestDateTimeObj = LocalDateTime.parse(requestDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        LocalDateTime requestDateTimeObj = LocalDateTime.parse(requestDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime startDateTimeObj = LocalDateTime.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
         if (requestDateTimeObj.isAfter(startDateTimeObj)) {
@@ -378,28 +417,31 @@ public class TicketService {
     // 개인 정보로 티켓 리스트 조회
     public List<TicketDTO> checkTicketByInfo(TicketCheckFormDTO ticketCheckFormDTO) {
 
-        Client client = clientRepository.findClientByNameAndPhoneNm(ticketCheckFormDTO.getName(), ticketCheckFormDTO.getPhoneNm());
+        List<Client> clientList = clientRepository.findClientByNameAndPhoneNm(ticketCheckFormDTO.getName(), ticketCheckFormDTO.getPhoneNm());
 
-        if (client == null) {
+        if (clientList.size() == 0) {
             throw new IllegalArgumentException("제공해주신 정보가 잘못된 정보입니다.");
         }
 
         List<TicketDTO> ticketDTOList = new ArrayList<>();
-        for (Ticket ticket : ticketRepository.findAllByClientId(client.getId())) {
+        for (Client client : clientList) {
 
-            StringBuilder seatInfoBuilder = new StringBuilder();
-            for (TicketSeat ticketSeat : ticketSeatRepository.findAllByTicket(ticket)) {
-                seatInfoBuilder.append(ticketSeat.getSeat().getSeatNm()).append(" ");
+            for (Ticket ticket : ticketRepository.findAllByClientId(client.getId())) {
+
+                StringBuilder seatInfoBuilder = new StringBuilder();
+                for (TicketSeat ticketSeat : ticketSeatRepository.findAllByTicket(ticket)) {
+                    seatInfoBuilder.append(ticketSeat.getSeat().getSeatNm()).append(" ");
+                }
+                String seatInfo = seatInfoBuilder.toString().trim();
+
+                // 서비스 단에서 넣을 것 주입
+                TicketDTO ticketDTO = TicketDTO.from(ticket);
+                ticketDTO.setPeopleNm(ticketSeatRepository.findAllByTicket(ticket).size());
+                ticketDTO.setSeatInfo(seatInfo);
+                ticketDTO.setPaymentMethod(paymentRepository.findPaymentByTicket(ticket).getMethod());
+
+                ticketDTOList.add(ticketDTO);
             }
-            String seatInfo = seatInfoBuilder.toString().trim();
-
-            // 서비스 단에서 넣을 것 주입
-            TicketDTO ticketDTO = TicketDTO.from(ticket);
-            ticketDTO.setPeopleNm(ticketSeatRepository.findAllByTicket(ticket).size());
-            ticketDTO.setSeatInfo(seatInfo);
-            ticketDTO.setPaymentMethod(paymentRepository.findPaymentByTicket(ticket).getMethod());
-
-            ticketDTOList.add(ticketDTO);
         }
 
         return ticketDTOList;
@@ -408,7 +450,12 @@ public class TicketService {
     // 예매 티켓 리스트 조회
     public List<TicketDTO> checkTickets(HttpServletRequest request) {
 
-        Client loginMember = (Client) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
+        Client loginMember;
+        try {
+            loginMember = (Client) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("로그인하지 않은 경우, 사용할 수 없는 기능입니다.");
+        }
 
         if (loginMember.getIsMember() == 'N') {
             throw new IllegalArgumentException("회원이 아닌 경우, 사용할 수 없는 기능입니다.");
@@ -470,7 +517,9 @@ public class TicketService {
             throw new IllegalArgumentException("출력할 티켓이 존재하지 않습니다.");
         }
 
-        if (!ticket.getStatus().equals(TicketStatus.PAYED)) {
+        if (ticket.getStatus().equals(TicketStatus.PRINTED)) {
+            throw new IllegalArgumentException("이미 출력된 티켓입니다.");
+        } else if (!ticket.getStatus().equals(TicketStatus.PAYED)) {
             throw new IllegalArgumentException("PAYED 상태가 아닌 경우 티켓 발권은 불가능합니다.");
         }
 
