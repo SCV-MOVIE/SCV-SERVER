@@ -22,7 +22,7 @@ public class TheaterController {
     // 상영관 등록 (어드민)
     @PostMapping
     @ApiOperation(value = "새로운 상영관 생성 (어드민)", notes = "행, 열, 이름, 테마를 입력받아 새로운 좌석과 상영관을 생성합니다.")
-    public ResponseEntity<Void> makeTheater(@Validated @RequestBody TheaterFormDTO theaterFormDTO) {
+    public ResponseEntity<Void> makeTheater(@RequestBody TheaterFormDTO theaterFormDTO) {
 
         theaterService.makeTheater(theaterFormDTO);
         return ResponseEntity.ok().build();

@@ -39,7 +39,7 @@ public class TheaterService {
     public void updateTheater(UpdateTheaterFormDTO updateTheaterFormDTO) {
 
         Theater theater = theaterRepository.findTheaterById((long) updateTheaterFormDTO.getTheaterId());
-        TheaterType theaterType = theaterTypeRepository.findTheaterTypeByName(updateTheaterFormDTO.getName());
+        TheaterType theaterType = theaterTypeRepository.findTheaterTypeByName(updateTheaterFormDTO.getTheaterType());
 
         // 새로 만들어질 상영관의 테마가 존재하지 않는 테마일 경우
         if (theaterType == null) {
@@ -52,7 +52,7 @@ public class TheaterService {
         }
 
         // 상영관 수정 요청 시간 (yyyy-MM-dd HH:mm)
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         Date formattedRequestDateTime;
         try {
             formattedRequestDateTime = format.parse(String.valueOf(LocalDateTime.now()));
@@ -133,7 +133,7 @@ public class TheaterService {
     @Transactional
     public void makeTheater(TheaterFormDTO theaterFormDTO) {
 
-        TheaterType theaterType = theaterTypeRepository.findTheaterTypeByName(theaterFormDTO.getName());
+        TheaterType theaterType = theaterTypeRepository.findTheaterTypeByName(theaterFormDTO.getTheaterType());
 
         // 새로 만들어질 상영관의 테마가 존재하지 않는 테마일 경우
         if (theaterType == null) {
