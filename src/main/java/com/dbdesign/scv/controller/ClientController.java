@@ -11,6 +11,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -96,5 +98,14 @@ public class ClientController {
     public ResponseEntity<?> isMemberLogin(@ApiIgnore @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) Client loginMember) {
 
         return ResponseEntity.ok().body(clientService.isMemberLogin(loginMember));
+    }
+
+    // 로그아웃
+    @PostMapping("/member/logout")
+    @ApiOperation(value = "로그아웃", notes = "로그아웃하며 세션와 쿠키를 초기화합니다.")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+
+        clientService.logout(request, response);
+        return ResponseEntity.ok().build();
     }
 }
