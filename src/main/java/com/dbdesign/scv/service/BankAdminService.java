@@ -2,34 +2,71 @@ package com.dbdesign.scv.service;
 
 import com.dbdesign.scv.dto.BankDTO;
 import com.dbdesign.scv.dto.HandleTicketDTO;
+import com.dbdesign.scv.dto.LoginDTO;
 import com.dbdesign.scv.entity.*;
 import com.dbdesign.scv.repository.*;
 import com.dbdesign.scv.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
-public class BankService {
+@Slf4j
+public class BankAdminService {
 
     private final BankRepository bankRepository;
+    private final BankAdminRepository bankAdminRepository;
     private final PaymentRepository paymentRepository;
     private final ClientRepository clientRepository;
     private final TicketRepository ticketRepository;
     private final TicketSeatRepository ticketSeatRepository;
 
-    public BankService(BankRepository bankRepository, PaymentRepository paymentRepository, ClientRepository clientRepository, TicketRepository ticketRepository, TicketSeatRepository ticketSeatRepository) {
+    public BankAdminService(BankRepository bankRepository, BankAdminRepository bankAdminRepository, PaymentRepository paymentRepository, ClientRepository clientRepository, TicketRepository ticketRepository, TicketSeatRepository ticketSeatRepository) {
         this.bankRepository = bankRepository;
+        this.bankAdminRepository = bankAdminRepository;
         this.paymentRepository = paymentRepository;
         this.clientRepository = clientRepository;
         this.ticketRepository = ticketRepository;
         this.ticketSeatRepository = ticketSeatRepository;
+    }
+
+    // 로그인
+    public void login(LoginDTO loginDTO) {
+
+        BankAdmin bankAdminMember = bankAdminRepository.findBankAdminByLoginId(loginDTO.getLoginId());
+
+        // 아이디 존재하지 않는 경우
+        if (bankAdminMember == null) { // 받은 loginId 로 회원이 존재하는 지 확인
+            throw new IllegalArgumentException("아이디가 존재하지 않습니다.");
+        }
+
+        if (loginDTO.getPassword().equals(TestConst.BANK_ADMIN_PWD)) {
+            createBankAdminSession(bankAdminMember);
+        } else {
+            throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하셨습니다.");
+        }
+    }
+
+    // 뱅크어드민 유저 세션 생성
+    public void createBankAdminSession(BankAdmin bankAdmin) {
+        HttpSession session = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest().getSession();
+        session.setAttribute(SessionConst.LOGIN_MEMBER, bankAdmin);
+
+        log.info("기존의 세션 반환 및 혹은 세션을 생성하였습니다.");
+        log.info("해당 세션 : " + session);
     }
 
     // 계좌 이체 요청에 대한 승인 또는 거절 (뱅크 어드민)
@@ -128,5 +165,25 @@ public class BankService {
         }
 
         return bankDTOList;
+    }
+
+    // 로그아웃
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+
+        // 세션 무효화
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        // 모든 쿠키 삭제
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                cookie.setMaxAge(0);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+            }
+        }
     }
 }

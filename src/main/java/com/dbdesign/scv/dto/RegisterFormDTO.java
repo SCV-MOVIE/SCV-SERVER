@@ -3,6 +3,7 @@ package com.dbdesign.scv.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 
@@ -15,6 +16,7 @@ public class RegisterFormDTO { // 회원가입 폼
     private String loginId;
 
     @NotBlank(message = "SCV 서비스 로그인 비밀번호를 입력해주세요.")
+    @Length(min = 5)
     @ApiModelProperty(value = "비밀번호", example = "1234", required = true)
     private String password;
 

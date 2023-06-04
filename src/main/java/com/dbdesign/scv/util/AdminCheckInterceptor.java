@@ -20,7 +20,7 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession(false); // 세션 가져옴
 
         Admin loginMember = (Admin) session.getAttribute(SessionConst.LOGIN_MEMBER);
-        if (!loginMember.getLoginId().equals(TestConst.TEST_ADMIN_UID)) { // 세션에 저장된 회원이 관리자가 아닌 경우, 403 에러를 뱉는다
+        if (loginMember == null) { // 세션에 저장된 회원이 없는 경우
 
             log.error("접근할 수 없는 페이지입니다.");
             response.sendError(HttpStatus.FORBIDDEN.value(), "접근할 수 없는 페이지입니다.");

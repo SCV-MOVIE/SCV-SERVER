@@ -1,12 +1,8 @@
 package com.dbdesign.scv.service;
 
 import com.dbdesign.scv.dto.*;
-import com.dbdesign.scv.entity.Admin;
-import com.dbdesign.scv.entity.BankAdmin;
 import com.dbdesign.scv.entity.Client;
 import com.dbdesign.scv.entity.Ticket;
-import com.dbdesign.scv.repository.AdminRepository;
-import com.dbdesign.scv.repository.BankAdminRepository;
 import com.dbdesign.scv.repository.ClientRepository;
 import com.dbdesign.scv.repository.TicketRepository;
 import com.dbdesign.scv.util.SessionConst;
@@ -34,8 +30,6 @@ import java.util.stream.Collectors;
 public class ClientService {
 
     private final ClientRepository clientRepository;
-    private final AdminRepository adminRepository;
-    private final BankAdminRepository bankAdminRepository;
     private final TicketRepository ticketRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -79,49 +73,23 @@ public class ClientService {
     public void login(LoginDTO loginDTO) {
 
         Client clientMember = clientRepository.findClientByLoginId(loginDTO.getLoginId());
-        Admin adminMember = adminRepository.findAdminByLoginId(loginDTO.getLoginId());
-        BankAdmin bankMember = bankAdminRepository.findBankAdminByLoginId(loginDTO.getLoginId());
-
 
         // 아이디 존재하지 않는 경우
-        if (clientMember == null && adminMember == null && bankMember == null) { // 받은 loginId 로 회원이 존재하는 지 확인
+        if (clientMember == null) { // 받은 loginId 로 회원이 존재하는 지 확인
             throw new IllegalArgumentException("아이디가 존재하지 않습니다.");
         }
 
-        // 테스트 계정 / 일반 계정 로그인
-        if (clientMember != null && adminMember == null && bankMember == null) { // 유저 계정인 경우
-            if (clientMember.getLoginId().equals(TestConst.TEST_USER_UID)) { // 테스트 계정인 경우
-                if (loginDTO.getPassword().equals(TestConst.TEST_PWD)) {
+        // 테스트 계정
+        if (loginDTO.getPassword().equals(TestConst.ADMIN_PWD)) {
 
-                    createUserSession(clientMember);
-                } else {
-                    throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하셨습니다.");
-                }
-            } else { // 일반 유저인 경우
-                if (passwordEncoder.matches(loginDTO.getPassword(), clientMember.getPassword())) {
+            createClientSession(clientMember);
 
-                    createUserSession(clientMember);
-                } else {
-                    throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하셨습니다.");
-                }
-            }
-        } else if (clientMember == null && adminMember != null && bankMember == null) { // 어드민 계정인 경우)
-            if (adminMember.getLoginId().equals(TestConst.TEST_ADMIN_UID)) { // 테스트 계정인 경우
-                if (loginDTO.getPassword().equals(TestConst.TEST_PWD)) {
+        } else { // 일반 유저인 경우
+            if (passwordEncoder.matches(loginDTO.getPassword(), clientMember.getPassword())) {
 
-                    createAdminSession(adminMember);
-                } else {
-                    throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하셨습니다.");
-                }
-            }
-        } else if (clientMember == null && adminMember == null) { // 은행 계정인 경우)
-            if (bankMember.getLoginId().equals(TestConst.TEST_BANK_UID)) { // 테스트 계정인 경우
-                if (loginDTO.getPassword().equals(TestConst.TEST_PWD)) {
-
-                    createBankSession(bankMember);
-                } else {
-                    throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하셨습니다.");
-                }
+                createClientSession(clientMember);
+            } else {
+                throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하셨습니다.");
             }
         }
     }
@@ -184,7 +152,7 @@ public class ClientService {
     }
 
     // 일반 유저 세션 생성
-    public void createUserSession(Client client) {
+    public void createClientSession(Client client) {
         HttpSession session = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest().getSession();
         session.setAttribute(SessionConst.LOGIN_MEMBER, client);
 
@@ -192,23 +160,6 @@ public class ClientService {
         log.info("해당 세션 : " + session);
     }
 
-    // 어드민 유저 세션 생성
-    public void createAdminSession(Admin admin) {
-        HttpSession session = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest().getSession();
-        session.setAttribute(SessionConst.LOGIN_MEMBER, admin);
-
-        log.info("기존의 세션 반환 및 혹은 세션을 생성하였습니다.");
-        log.info("해당 세션 : " + session);
-    }
-
-    // 뱅크어드민 유저 세션 생성
-    public void createBankSession(BankAdmin bankAdmin) {
-        HttpSession session = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest().getSession();
-        session.setAttribute(SessionConst.LOGIN_MEMBER, bankAdmin);
-
-        log.info("기존의 세션 반환 및 혹은 세션을 생성하였습니다.");
-        log.info("해당 세션 : " + session);
-    }
 
     // 모든 유저 리스트 반환
     public List<ClientDTO> getUserList() {
