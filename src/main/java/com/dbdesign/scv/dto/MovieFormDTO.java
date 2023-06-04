@@ -37,6 +37,6 @@ public class MovieFormDTO {
     @ApiModelProperty(value = "스태프 리스트", example = "staff1, staff2, staff3", required = true)
     private String staff;
 
-    @ApiModelProperty(value = "장르 리스트", example = "horror", required = true)
+    @ApiModelProperty(value = "장르 리스트", required = true)
     private List<GenreDTO> genreDTOList;
 }
