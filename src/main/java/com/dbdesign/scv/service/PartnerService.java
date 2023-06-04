@@ -24,13 +24,7 @@ public class PartnerService {
 
     // 제휴사 등록 (어드민)
     @Transactional
-    public void registerPartner(HttpServletRequest request, PartnerFormDTO partnerFormDTO) {
-
-        Admin loginAdmin = (Admin) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
-
-        if (loginAdmin == null) {
-            throw new IllegalArgumentException("어드민이 아닌 경우, 사용할 수 없는 기능입니다.");
-        }
+    public void registerPartner(PartnerFormDTO partnerFormDTO) {
 
         // 새로운 제휴사 등록
         Partner newPartner = Partner.builder()

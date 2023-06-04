@@ -24,17 +24,17 @@ public class BankController {
     @PatchMapping("/handle/ticket")
     @ApiOperation(value = "계좌 이체 요청에 대한 승인 또는 거절 (뱅크어드민)", notes = "계좌 이체 요청에 대한 승인 또는 거절을 합니다." +
             "\n이에 따라 payment 와 ticket 의 상태 또한 바뀌며 거절한 경우, 티켓의 금액이 포인트로 전환됩니다.")
-    public ResponseEntity<Void> handleTicket(HttpServletRequest request, @RequestBody HandleTicketDTO handleTicketDTO) {
+    public ResponseEntity<Void> handleTicket(@RequestBody HandleTicketDTO handleTicketDTO) {
 
-        bankService.handleTicket(request, handleTicketDTO);
+        bankService.handleTicket(handleTicketDTO);
         return ResponseEntity.ok().build();
     }
 
     // 모든 결제 내역 조회 (뱅크 어드민)
     @GetMapping("/bankAdmin/bank/list")
     @ApiOperation(value = "모든 결제 내역 조회 (뱅크 어드민)", notes = "뱅크 어드민이 아닌 경우, 사용할 수 없는 기능입니다.")
-    public ResponseEntity<List<BankDTO>> showBanks(HttpServletRequest request) {
+    public ResponseEntity<List<BankDTO>> showBanks() {
 
-        return ResponseEntity.ok().body(bankService.showBanks(request));
+        return ResponseEntity.ok().body(bankService.showBanks());
     }
 }

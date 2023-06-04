@@ -34,15 +34,9 @@ public class BankService {
 
     // 계좌 이체 요청에 대한 승인 또는 거절 (뱅크 어드민)
     @Transactional
-    public void handleTicket(HttpServletRequest request, HandleTicketDTO handleTicketDTO) {
+    public void handleTicket(HandleTicketDTO handleTicketDTO) {
 
         String requestDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-
-        BankAdmin loginBankAdmin = (BankAdmin) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
-
-        if (loginBankAdmin == null) {
-            throw new IllegalArgumentException("뱅크어드민이 아닌 경우, 사용할 수 없는 기능입니다.");
-        }
 
         Bank bank = bankRepository.findBankById((long) handleTicketDTO.getBankId());
 
@@ -119,13 +113,7 @@ public class BankService {
     }
 
     // 모든 결제 내역 조회 (뱅크 어드민)
-    public List<BankDTO> showBanks(HttpServletRequest request) {
-
-        BankAdmin loginBankAdmin = (BankAdmin) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
-
-        if (loginBankAdmin == null) {
-            throw new IllegalArgumentException("뱅크어드민이 아닌 경우, 사용할 수 없는 기능입니다.");
-        }
+    public List<BankDTO> showBanks() {
 
         List<BankDTO> bankDTOList = new ArrayList<>();
         for (Bank bank : bankRepository.findAll()) {

@@ -316,7 +316,7 @@ public class TicketService {
 
     // 티켓 취소
     @Transactional
-    public void cancelTicket(String ticketId) { // TODO: ticket_seat에서 삭제할 것 + is_sold_out 갱신
+    public void cancelTicket(String ticketId) {
 
         // 영화가 상영되지 않았으면 취소가 가능
         String requestDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -436,13 +436,7 @@ public class TicketService {
     }
 
     // 모든 티켓 조회 (어드민)
-    public List<TicketDTO> showTickets(HttpServletRequest request) {
-
-        Admin loginAdmin = (Admin) request.getSession(false).getAttribute(SessionConst.LOGIN_MEMBER);
-
-        if (loginAdmin == null) {
-            throw new IllegalArgumentException("어드민이 아닌 경우, 사용할 수 없는 기능입니다.");
-        }
+    public List<TicketDTO> showTickets() {
 
         List<TicketDTO> ticketDTOList = new ArrayList<>();
         for (Ticket ticket : ticketRepository.findAll()) {

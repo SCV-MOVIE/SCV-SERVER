@@ -23,9 +23,9 @@ public class PartnerController {
     // 제휴사 등록 (어드민)
     @PostMapping
     @ApiOperation(value = "제휴사 등록 (어드민)", notes = "제휴사 이름과 할인 금액을 기입합니다.")
-    public ResponseEntity<Void> registerPartner(HttpServletRequest request, @RequestBody PartnerFormDTO partnerFormDTO) {
+    public ResponseEntity<Void> registerPartner(@RequestBody PartnerFormDTO partnerFormDTO) {
 
-        partnerService.registerPartner(request, partnerFormDTO);
+        partnerService.registerPartner(partnerFormDTO);
         return ResponseEntity.ok().build();
     }
 
