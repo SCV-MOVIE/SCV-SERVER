@@ -37,6 +37,6 @@ public class UpdateMovieDTO {
     @ApiModelProperty(value = "새로운 스태프 리스트", example = "staff1, staff2, staff3", required = true)
     private String newStaff;
 
-    @ApiModelProperty(value = "새로운 장르 리스트", example = "horror", required = true)
+    @ApiModelProperty(value = "새로운 장르 리스트", required = true)
     private List<GenreDTO> genreDTOList;
 }
