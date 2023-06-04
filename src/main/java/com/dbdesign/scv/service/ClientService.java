@@ -128,7 +128,7 @@ public class ClientService {
 
     // 회원 탈퇴
     @Transactional
-    public void deleteUser(DeleteClientDTO deleteClientDTO) { // TODO: 상영일정, 티켓 관련 api 작성 이후 테스트해볼 것
+    public void deleteUser(DeleteClientDTO deleteClientDTO) {
 
         Client client = clientRepository.findClientById(deleteClientDTO.getId());
 

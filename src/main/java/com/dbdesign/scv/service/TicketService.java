@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Service
@@ -399,11 +400,11 @@ public class TicketService {
             throw new IllegalArgumentException("해당 번호로 된 예매 티켓이 없습니다.");
         }
 
-        StringBuilder seatInfoBuilder = new StringBuilder();
+        StringJoiner seatInfoJoiner = new StringJoiner(", ");
         for (TicketSeat ticketSeat : ticketSeatRepository.findAllByTicket(ticket)) {
-            seatInfoBuilder.append(ticketSeat.getSeat().getSeatNm()).append(" ");
+            seatInfoJoiner.add(ticketSeat.getSeat().getSeatNm().trim());
         }
-        String seatInfo = seatInfoBuilder.toString().trim();
+        String seatInfo = seatInfoJoiner.toString();
 
         // 서비스 단에서 넣을 것 주입
         TicketDTO ticketDTO = TicketDTO.from(ticket);
@@ -428,11 +429,11 @@ public class TicketService {
 
             for (Ticket ticket : ticketRepository.findAllByClientId(client.getId())) {
 
-                StringBuilder seatInfoBuilder = new StringBuilder();
+                StringJoiner seatInfoJoiner = new StringJoiner(", ");
                 for (TicketSeat ticketSeat : ticketSeatRepository.findAllByTicket(ticket)) {
-                    seatInfoBuilder.append(ticketSeat.getSeat().getSeatNm()).append(" ");
+                    seatInfoJoiner.add(ticketSeat.getSeat().getSeatNm().trim());
                 }
-                String seatInfo = seatInfoBuilder.toString().trim();
+                String seatInfo = seatInfoJoiner.toString();
 
                 // 서비스 단에서 넣을 것 주입
                 TicketDTO ticketDTO = TicketDTO.from(ticket);
@@ -464,11 +465,11 @@ public class TicketService {
         List<TicketDTO> ticketDTOList = new ArrayList<>();
         for (Ticket ticket : ticketRepository.findAllByClientId(loginMember.getId())) {
 
-            StringBuilder seatInfoBuilder = new StringBuilder();
+            StringJoiner seatInfoJoiner = new StringJoiner(", ");
             for (TicketSeat ticketSeat : ticketSeatRepository.findAllByTicket(ticket)) {
-                seatInfoBuilder.append(ticketSeat.getSeat().getSeatNm()).append(" ");
+                seatInfoJoiner.add(ticketSeat.getSeat().getSeatNm().trim());
             }
-            String seatInfo = seatInfoBuilder.toString().trim();
+            String seatInfo = seatInfoJoiner.toString();
 
             // 서비스 단에서 넣을 것 주입
             TicketDTO ticketDTO = TicketDTO.from(ticket);
@@ -488,11 +489,11 @@ public class TicketService {
         List<TicketDTO> ticketDTOList = new ArrayList<>();
         for (Ticket ticket : ticketRepository.findAll()) {
 
-            StringBuilder seatInfoBuilder = new StringBuilder();
+            StringJoiner seatInfoJoiner = new StringJoiner(", ");
             for (TicketSeat ticketSeat : ticketSeatRepository.findAllByTicket(ticket)) {
-                seatInfoBuilder.append(ticketSeat.getSeat().getSeatNm()).append(" ");
+                seatInfoJoiner.add(ticketSeat.getSeat().getSeatNm().trim());
             }
-            String seatInfo = seatInfoBuilder.toString().trim();
+            String seatInfo = seatInfoJoiner.toString();
 
             // 서비스 단에서 넣을 것 주입
             TicketDTO ticketDTO = TicketDTO.from(ticket);
