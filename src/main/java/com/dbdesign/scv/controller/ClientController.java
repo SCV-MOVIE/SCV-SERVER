@@ -66,7 +66,7 @@ public class ClientController {
     }
 
     // 회원 탈퇴
-    @PatchMapping("/member/withdrawal")
+    @DeleteMapping("/member/withdrawal")
     @ApiOperation(value = "회원 탈퇴", notes = "비밀번호 일치 시 회원 탈퇴가 가능합니다.")
     public ResponseEntity<Void> deleteUser(@RequestBody DeleteClientDTO deleteClientDTO) {
 
