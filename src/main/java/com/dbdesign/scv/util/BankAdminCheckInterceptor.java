@@ -1,6 +1,6 @@
 package com.dbdesign.scv.util;
 
-import com.dbdesign.scv.entity.Admin;
+import com.dbdesign.scv.entity.BankAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-public class AdminCheckInterceptor implements HandlerInterceptor {
+public class BankAdminCheckInterceptor implements HandlerInterceptor {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -19,11 +19,11 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
 
         HttpSession session = request.getSession(false); // 세션 가져옴
 
-        Admin loginMember = (Admin) session.getAttribute(SessionConst.LOGIN_MEMBER);
+        BankAdmin loginMember = (BankAdmin) session.getAttribute(SessionConst.LOGIN_MEMBER);
         if (loginMember == null) { // 세션에 저장된 회원이 없는 경우
 
-            log.error("어드민 외엔 접근할 수 없는 페이지입니다.");
-            response.sendError(HttpStatus.FORBIDDEN.value(), "어드민 외엔 접근할 수 없는 페이지입니다.");
+            log.error("뱅크 어드민 외엔 접근할 수 없는 페이지입니다.");
+            response.sendError(HttpStatus.FORBIDDEN.value(), "뱅크 어드민 외엔 접근할 수 없는 페이지입니다.");
             return false;
         }
         return true;

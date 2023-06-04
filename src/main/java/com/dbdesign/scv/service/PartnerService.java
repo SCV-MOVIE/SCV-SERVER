@@ -2,14 +2,11 @@ package com.dbdesign.scv.service;
 
 import com.dbdesign.scv.dto.PartnerDTO;
 import com.dbdesign.scv.dto.PartnerFormDTO;
-import com.dbdesign.scv.entity.Admin;
 import com.dbdesign.scv.entity.Partner;
 import com.dbdesign.scv.repository.PartnerRepository;
-import com.dbdesign.scv.util.SessionConst;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
