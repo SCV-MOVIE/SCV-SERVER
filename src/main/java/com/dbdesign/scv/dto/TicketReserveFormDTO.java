@@ -16,7 +16,7 @@ public class TicketReserveFormDTO {
     @ApiModelProperty(value = "개인 정보(이름, 주민등록번호, 전화번호)", example = "ACCOUNT", required = true)
     private PrivateInfoDTO privateInfoDTO; // 회원일 시, null 값
 
-    @ApiModelProperty(value = "좌석 리스트", example = "SeatDTO list", required = true)
+    @ApiModelProperty(value = "좌석 리스트", required = true)
     private List<SeatDTO> seats;
 
     @ApiModelProperty(value = "사용한 포인트", example = "1000", required = true)

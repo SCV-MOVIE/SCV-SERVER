@@ -5,16 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 @Setter
 @Getter
 public class TheaterFormDTO {
 
-    @NotBlank(message = "새로운 상영관의 행 수를 기입해주세요.")
     @ApiModelProperty(value = "상영관의 행 수", example = "10", required = true)
     private int row;
 
-    @NotBlank(message = "새로운 상영관의 열 수를 기입해주세요.")
     @ApiModelProperty(value = "상영관의 열 수", example = "10", required = true)
     private int column;
 

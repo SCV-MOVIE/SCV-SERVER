@@ -10,15 +10,12 @@ import javax.validation.constraints.NotBlank;
 @Getter
 public class UpdateTheaterFormDTO {
 
-    @NotBlank(message = "수정할 상영관의 id(Primary Key)를 기입해주세요.")
     @ApiModelProperty(value = "상영관의 id", example = "1", required = true)
     private int theaterId;
 
-    @NotBlank(message = "새로운 상영관의 행 수를 기입해주세요.")
     @ApiModelProperty(value = "상영관의 행 수", example = "10", required = true)
     private int row;
 
-    @NotBlank(message = "새로운 상영관의 열 수를 기입해주세요.")
     @ApiModelProperty(value = "상영관의 열 수", example = "10", required = true)
     private int column;
 

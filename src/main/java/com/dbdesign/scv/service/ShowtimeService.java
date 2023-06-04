@@ -49,44 +49,48 @@ public class ShowtimeService {
         // 상영일정 시간 (yyyy-MM-dd HH:mm)
         String startDateTime = showtimeFormDTO.getStartDate() + " " + showtimeFormDTO.getStartTime();
 
-        // 상영일정에 등록할 영화가 존재하지 않는 경우
-        if (movie == null) { // 받은 id 로 영화가 존재하는 지 확인
+        // 상영일정에 등록할 영화가 존재하지 않거나 삭제된 경우
+        if (movie == null || movie.getDeleted() == 'Y') { // 받은 id 로 영화가 존재하는 지 확인
             throw new IllegalArgumentException("상영일정에 등록할 영화가 존재하지 않습니다.");
         }
 
-        // 상영일정에 등록할 상영관이 존재하지 않는 경우
-        if (theater == null) { // 받은 id 로 상영일정이 존재하는 지 확인
+        // 상영일정에 등록할 상영관이 존재하지 않거나 삭제된 경우
+        if (theater == null || theater.getDeleted() == 'Y') { // 받은 id 로 상영일정이 존재하는 지 확인
             throw new IllegalArgumentException("상영일정에 등록할 상영관이 존재하지 않습니다.");
         }
 
-        // 해당 상영일, 상영시간에 상영하지 않는 상영관이 있어야 상영일정을 입력할 수 있습니다.
+        // 공개된 상영 일정 중, 해당 상영일, 상영시간에 상영하지 않는 상영관이 있어야 상영일정을 입력할 수 있습니다.
         for (Showtime showtime : showtimeRepository.findAll()) {
 
-            // 범위의 시작 시간
-            String rangeStartDateTime = showtime.getStartDate();
+            if (showtime.getIsPublic() == 'Y') {
+                // 범위의 시작 시간
+                String rangeStartDateTime = showtime.getStartDate();
 
-            // 범위의 끝 시간 계산
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            Calendar calendar = Calendar.getInstance();
-            Date rangeStartDate;
-            try {
-                rangeStartDate = format.parse(rangeStartDateTime);
-                calendar.setTime(rangeStartDate);
-                calendar.add(Calendar.MINUTE, showtime.getMovie().getLength());
-            } catch (ParseException e) {
-                e.printStackTrace();
-                return;
-            }
-            Date rangeEndDate = calendar.getTime();
+                // 범위의 끝 시간 계산
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                Calendar calendar = Calendar.getInstance();
+                Date rangeStartDate;
+                try {
+                    rangeStartDate = format.parse(rangeStartDateTime);
+                    calendar.setTime(rangeStartDate);
+                    calendar.add(Calendar.MINUTE, showtime.getMovie().getLength());
+                    calendar.add(Calendar.MINUTE, 20); // 쉬는 시간
 
-            // 등록할 상영일정의 일자가 이미 상영되고 있는 시간에 속하는 지 확인
-            try {
-                Date formattedStartDateTime = format.parse(startDateTime);
-                if (formattedStartDateTime.compareTo(rangeStartDate) >= 0 && formattedStartDateTime.compareTo(rangeEndDate) < 0) {
-                    throw new IllegalArgumentException("해당 상영관은 상영 일정이 있습니다.");
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return;
                 }
-            } catch (ParseException e) {
-                e.printStackTrace();
+                Date rangeEndDate = calendar.getTime();
+
+                // 등록할 상영일정의 일자가 이미 상영되고 있는 시간에 속하는 지 확인
+                try {
+                    Date formattedStartDateTime = format.parse(startDateTime);
+                    if (formattedStartDateTime.compareTo(rangeStartDate) >= 0 && formattedStartDateTime.compareTo(rangeEndDate) < 0) {
+                        throw new IllegalArgumentException("해당 상영관에 상영 일정이 있습니다.");
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -106,15 +110,15 @@ public class ShowtimeService {
     @Transactional
     public void openShowtime(String showtimeId) {
 
-        Showtime showtime = showtimeRepository.findShowtimeById(Long.valueOf(showtimeId));
+        Showtime requestedShowtime = showtimeRepository.findShowtimeById(Long.valueOf(showtimeId));
 
         // 상영일정이 존재하지 않는 경우
-        if (showtime == null) { // 받은 id 로 상영일정이 존재하는 지 확인
+        if (requestedShowtime == null) { // 받은 id 로 상영일정이 존재하는 지 확인
             throw new IllegalArgumentException("상영일정이 존재하지 않습니다.");
         }
 
         // 이미 공개된 상영 일정인 경우
-        if (showtime.getIsPublic() == 'Y') {
+        if (requestedShowtime.getIsPublic() == 'Y') {
             throw new IllegalArgumentException("이미 공개된 상영일정입니다.");
         }
 
@@ -125,53 +129,112 @@ public class ShowtimeService {
           그리고 현재 상영 일정의 회차 번호가 maxRound + 1과 같은지 확인.
           같지 않다면 예외를 던지고, 같다면 상영 일정을 공개로 설정.
          */
-        if (showtime.getRound() > 1) {
-            List<Showtime> showtimeList = showtimeRepository.findAllByMovie(showtime.getMovie());
+        if (requestedShowtime.getRound() > 1) {
+            List<Showtime> showtimeList = showtimeRepository.findAllByMovie(requestedShowtime.getMovie());
             int maxRound = 0;
 
             for (Showtime item : showtimeList) {
-                if (item.getRound() > maxRound) {
+                if (item.getIsPublic() == 'Y' && item.getRound() > maxRound) {
                     maxRound = item.getRound();
                 }
             }
 
-            if (showtime.getRound() != maxRound + 1) {
+            System.out.println("최대 회차 : " + maxRound);
+
+            if (requestedShowtime.getRound() != maxRound + 1) {
                 throw new IllegalArgumentException("입력하신 상영 일정의 회차의 순서가 맞지 않습니다.");
             }
         }
 
-        showtime.setIsPublic('Y');
-        showtimeRepository.save(showtime);
+        requestedShowtime.setIsPublic('Y');
+        showtimeRepository.save(requestedShowtime);
     }
 
     // 상영일정 수정
     @Transactional
     public void updateShowtime(UpdateShowtimeDTO updateShowtimeDTO) {
 
-        Showtime showtime = showtimeRepository.findShowtimeById((long) updateShowtimeDTO.getShowtimeId());
+        Showtime requestedShowtime = showtimeRepository.findShowtimeById((long) updateShowtimeDTO.getShowtimeId());
 
         // 상영일정이 존재하지 않는 경우
-        if (showtime == null) { // 받은 id 로 상영일정이 존재하는 지 확인
+        if (requestedShowtime == null) { // 받은 id 로 상영일정이 존재하는 지 확인
             throw new IllegalArgumentException("상영일정이 존재하지 않습니다.");
         }
 
         // 이미 공개된 상영 일정인 경우
-        if (showtime.getIsPublic() == 'Y') {
+        if (requestedShowtime.getIsPublic() == 'Y') {
             throw new IllegalArgumentException("이미 공개된 상영일정입니다.");
         }
 
         // 예매 티켓이 있는 상영일정을 수정하려는 경우
-        if (ticketRepository.findAllByShowtime(showtime) != null) {
+        if (ticketRepository.findAllByShowtime(requestedShowtime).size() != 0) {
             throw new IllegalArgumentException("예매 티켓이 있어 수정 불가능한 상영일정입니다.");
         }
 
-        // 상영 일정 수정 및 db 반영
-        showtime.setStartDate(updateShowtimeDTO.getStartDate());
-        showtime.setRound(updateShowtimeDTO.getRound());
-        showtime.setMovie(movieRepository.findMovieById((long) updateShowtimeDTO.getMovieId()));
-        showtime.setTheater(theaterRepository.findTheaterById((long) updateShowtimeDTO.getShowtimeId()));
+        /*
+          영화의 상영 일정을 가져와 가장 큰 회차 번호(maxRound)를 찾는다.
+          그리고 현재 상영 일정의 회차 번호가 maxRound 보다 같거나 작은지 확인.
+          작거나 같다면 어차피 수정이 또 필요한 것이므로 에러를 던짐.
+         */
+        List<Showtime> showtimeList = showtimeRepository.findAllByMovie(requestedShowtime.getMovie());
+        int maxRound = 0;
 
-        showtimeRepository.save(showtime);
+        for (Showtime item : showtimeList) {
+            if (item.getIsPublic() == 'Y' && item.getRound() > maxRound) {
+                maxRound = item.getRound();
+            }
+        }
+
+        System.out.println("최대 회차 : " + maxRound);
+
+        if (updateShowtimeDTO.getRound() <= maxRound) {
+
+            System.out.println("수정하는 상영일정의 회차 : " + updateShowtimeDTO.getRound());
+            throw new IllegalArgumentException("입력하신 상영 일정의 회차의 순서가 맞지 않습니다.");
+        }
+
+
+        // 공개된 상영 일정 중, 해당 상영일, 상영시간에 상영하지 않는 상영관이 있어야 상영일정을 입력할 수 있습니다.
+        for (Showtime showtime : showtimeRepository.findAll()) {
+
+            if (showtime.getIsPublic() == 'Y') {
+                // 범위의 시작 시간
+                String rangeStartDateTime = showtime.getStartDate();
+
+                // 범위의 끝 시간 계산
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                Calendar calendar = Calendar.getInstance();
+                Date rangeStartDate;
+                try {
+                    rangeStartDate = format.parse(rangeStartDateTime);
+                    calendar.setTime(rangeStartDate);
+                    calendar.add(Calendar.MINUTE, showtime.getMovie().getLength());
+                    calendar.add(Calendar.MINUTE, 20); // 쉬는 시간
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                Date rangeEndDate = calendar.getTime();
+
+                // 수정할 상영일정의 시작 일자(startDate)가 이미 상영되고 있는 시간에 속하는 지 확인
+                try {
+                    Date formattedStartDateTime = format.parse(updateShowtimeDTO.getStartDate());
+                    if (formattedStartDateTime.compareTo(rangeStartDate) >= 0 && formattedStartDateTime.compareTo(rangeEndDate) < 0) {
+                        throw new IllegalArgumentException("해당 상영관에 상영 일정이 있습니다.");
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // 상영 일정 수정 및 db 반영
+        requestedShowtime.setStartDate(updateShowtimeDTO.getStartDate());
+        requestedShowtime.setRound(updateShowtimeDTO.getRound());
+        requestedShowtime.setMovie(movieRepository.findMovieById((long) updateShowtimeDTO.getMovieId()));
+        requestedShowtime.setTheater(theaterRepository.findTheaterById((long) updateShowtimeDTO.getTheaterId()));
+
+        showtimeRepository.save(requestedShowtime);
     }
 
     // 상영일정 삭제
@@ -191,7 +254,7 @@ public class ShowtimeService {
         }
 
         // 예매 티켓이 있는 상영일정을 수정하려는 경우
-        if (ticketRepository.findAllByShowtime(showtime) != null) {
+        if (ticketRepository.findAllByShowtime(showtime).size() != 0) {
             throw new IllegalArgumentException("예매 티켓이 있어 수정 불가능한 상영일정입니다.");
         }
 
@@ -297,7 +360,9 @@ public class ShowtimeService {
         for (Showtime showtime : showtimeList) {
             // public 상영 일정인지 확인
             if (showtime.getIsPublic() == 'Y') {
-                LocalDateTime startDateTime = LocalDateTime.parse(showtime.getStartDate());
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                LocalDateTime startDateTime = LocalDateTime.parse(showtime.getStartDate(), formatter);
                 int movieLength = movie.getLength();
 
                 // 시작 시간 추천 계산
@@ -309,7 +374,7 @@ public class ShowtimeService {
             }
         }
 
-        // 공개된 상영 일정이 없는 경우, 요청 날짜의 다음 날짜 오전 10시로 추천
+        // // 공개된 상영 일정이 없는 경우, 요청 날짜의 다음 날짜 오전 10시로 추천
         if (latestStartDateTime == null) {
             // 요청 시간의 다음 날짜의 오전 10시로 변경
             LocalDateTime currentDateTime = LocalDateTime.now();
@@ -338,7 +403,7 @@ public class ShowtimeService {
         // for 문을 돌며 상영일정의 상영관으로 모든 좌석을 가져와 ticket_seat 테이블을 참조하여 있으면 reservedSeatList 에 해당 좌석의 seat_nm 저장
         for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
             if (ticketSeatRepository.existsBySeat(seat)) {
-                reservedSeatList.add(seat.getSeatNm());
+                reservedSeatList.add(seat.getSeatNm().trim());
             }
         }
 
