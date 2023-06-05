@@ -164,15 +164,19 @@ public class TicketService {
             }
 
             // 상영 일정 is_sold_out 갱신
-            int remainedSeatNm = 0;
+            int reservedSeatNm = 0;
 
+            // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
             for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
-                if (!ticketSeatRepository.existsBySeat(seat)) {
-                    remainedSeatNm++;
+
+                TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
+
+                if (ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
+                    reservedSeatNm++;
                 }
             }
 
-            if (remainedSeatNm == 0) {
+            if (reservedSeatNm == seatRepository.findAllByTheater(showtime.getTheater()).size()) {
                 showtime.setIsSoldOut('Y');
                 showtimeRepository.save(showtime);
             }
@@ -316,15 +320,19 @@ public class TicketService {
             }
 
             // 상영 일정 is_sold_out 갱신
-            int remainedSeatNm = 0;
+            int reservedSeatNm = 0;
 
+            // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
             for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
-                if (!ticketSeatRepository.existsBySeat(seat)) {
-                    remainedSeatNm++;
+
+                TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
+
+                if (ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
+                    reservedSeatNm++;
                 }
             }
 
-            if (remainedSeatNm == 0) {
+            if (reservedSeatNm == seatRepository.findAllByTheater(showtime.getTheater()).size()) {
                 showtime.setIsSoldOut('Y');
                 showtimeRepository.save(showtime);
             }
@@ -381,9 +389,6 @@ public class TicketService {
         ticket.setStatus(TicketStatus.CANCELLED);
         ticket.setUpdatedAt(requestDateTime);
         ticketRepository.save(ticket);
-
-        // ticket_seat 에서 row 삭제
-        ticketSeatRepository.deleteAllByTicket(ticket);
 
         // 포인트 반환
         Client client = ticket.getClient();

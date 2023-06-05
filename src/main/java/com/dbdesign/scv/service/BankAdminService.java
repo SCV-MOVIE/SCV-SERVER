@@ -32,15 +32,13 @@ public class BankAdminService {
     private final PaymentRepository paymentRepository;
     private final ClientRepository clientRepository;
     private final TicketRepository ticketRepository;
-    private final TicketSeatRepository ticketSeatRepository;
 
-    public BankAdminService(BankRepository bankRepository, BankAdminRepository bankAdminRepository, PaymentRepository paymentRepository, ClientRepository clientRepository, TicketRepository ticketRepository, TicketSeatRepository ticketSeatRepository) {
+    public BankAdminService(BankRepository bankRepository, BankAdminRepository bankAdminRepository, PaymentRepository paymentRepository, ClientRepository clientRepository, TicketRepository ticketRepository) {
         this.bankRepository = bankRepository;
         this.bankAdminRepository = bankAdminRepository;
         this.paymentRepository = paymentRepository;
         this.clientRepository = clientRepository;
         this.ticketRepository = ticketRepository;
-        this.ticketSeatRepository = ticketSeatRepository;
     }
 
     // 로그인
@@ -136,9 +134,6 @@ public class BankAdminService {
             ticket.setStatus(TicketStatus.REJECTED);
             ticket.setUpdatedAt(requestDateTime);
             ticketRepository.save(ticket);
-
-            // ticket_seat 에서 row 삭제
-            ticketSeatRepository.deleteAllByTicket(ticket);
 
             // 포인트로 환급
             Client client = payment.getTicket().getClient();
