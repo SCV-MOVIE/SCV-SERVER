@@ -6,6 +6,7 @@ import com.dbdesign.scv.dto.ShowtimeFormDTO;
 import com.dbdesign.scv.dto.UpdateShowtimeDTO;
 import com.dbdesign.scv.entity.*;
 import com.dbdesign.scv.repository.*;
+import com.dbdesign.scv.util.TicketStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -269,18 +270,20 @@ public class ShowtimeService {
 
         for (Showtime showtime : showtimeRepository.findAll()) {
 
-            int remainedSeatNm = 0;
+            int reservedSeatNm = 0;
 
-            // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket_seat 테이블에 존재하는 행의 수
-            for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())
-            ) {
-                if (!ticketSeatRepository.existsBySeat(seat)) {
-                    remainedSeatNm++;
+            // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
+            for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
+
+                TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
+
+                if (ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
+                    reservedSeatNm++;
                 }
             }
 
             ShowtimeDTO showtimeDTO = ShowtimeDTO.from(showtime);
-            showtimeDTO.setRemainSeatNm(remainedSeatNm);
+            showtimeDTO.setRemainSeatNm(seatRepository.findAllByTheater(showtime.getTheater()).size() - reservedSeatNm);
             showtimeDTO.setTheaterSize(seatRepository.findAllByTheater(showtime.getTheater()).size());
 
             // 서비스 단에서 MovieDTO 에 Genre 추가
@@ -309,18 +312,20 @@ public class ShowtimeService {
         for (Showtime showtime : showtimeRepository.findAll()) {
 
             if (showtime.getIsPublic() == 'Y') { // 공개된 상영일정에 대해서만 로직 적용
-                int remainedSeatNm = 0;
+                int reservedSeatNm = 0;
 
-                // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket_seat 테이블에 존재하는 행의 수
-                for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())
-                ) {
-                    if (!ticketSeatRepository.existsBySeat(seat)) {
-                        remainedSeatNm++;
+                // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
+                for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
+
+                    TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
+
+                    if (ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
+                        reservedSeatNm++;
                     }
                 }
 
                 ShowtimeDTO showtimeDTO = ShowtimeDTO.from(showtime);
-                showtimeDTO.setRemainSeatNm(remainedSeatNm);
+                showtimeDTO.setRemainSeatNm(seatRepository.findAllByTheater(showtime.getTheater()).size() - reservedSeatNm);
                 showtimeDTO.setTheaterSize(seatRepository.findAllByTheater(showtime.getTheater()).size()); // 상영관으로 모든 좌석을 가져와서 크기를 넣음
 
                 // 서비스 단에서 MovieDTO 에 Genre 추가
@@ -402,7 +407,10 @@ public class ShowtimeService {
 
         // for 문을 돌며 상영일정의 상영관으로 모든 좌석을 가져와 ticket_seat 테이블을 참조하여 있으면 reservedSeatList 에 해당 좌석의 seat_nm 저장
         for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
-            if (ticketSeatRepository.existsBySeat(seat)) {
+
+            TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
+
+            if (ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
                 reservedSeatList.add(seat.getSeatNm().trim());
             }
         }

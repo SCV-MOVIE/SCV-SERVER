@@ -2,9 +2,11 @@ package com.dbdesign.scv.service;
 
 import com.dbdesign.scv.entity.Seat;
 import com.dbdesign.scv.entity.Theater;
+import com.dbdesign.scv.entity.TicketSeat;
 import com.dbdesign.scv.repository.SeatRepository;
 import com.dbdesign.scv.repository.TheaterRepository;
 import com.dbdesign.scv.repository.TicketSeatRepository;
+import com.dbdesign.scv.util.TicketStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,6 +47,8 @@ public class SeatService {
 
         Seat seat = seatRepository.findSeatBySeatNmAndTheater(seatNm, theater);
 
-        return ticketSeatRepository.existsBySeat(seat);
+        TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
+
+        return ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED);
     }
 }
