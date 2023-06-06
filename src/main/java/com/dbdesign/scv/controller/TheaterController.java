@@ -1,5 +1,6 @@
 package com.dbdesign.scv.controller;
 
+import com.dbdesign.scv.dto.TheaterDTO;
 import com.dbdesign.scv.dto.TheaterFormDTO;
 import com.dbdesign.scv.dto.UpdateTheaterFormDTO;
 import com.dbdesign.scv.service.TheaterService;
@@ -8,6 +9,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/theater")
@@ -52,5 +55,13 @@ public class TheaterController {
 
         theaterService.deleteTheater(theaterId);
         return ResponseEntity.ok().build();
+    }
+
+    // 상영관 리스트 반환
+    @GetMapping("/list")
+    @ApiOperation(value = "모든 상영관 리스트 반환", notes = "모든 상영관 리스트를 반환합니다.")
+    public ResponseEntity<List<TheaterDTO>> theaterList() {
+
+        return ResponseEntity.ok().body(theaterService.showTheaterList());
     }
 }

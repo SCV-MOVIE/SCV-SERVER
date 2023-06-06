@@ -40,7 +40,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:8080", "http://43.200.73.134:443", "https://uos-scv.store"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:8080", "http://43.200.73.134:443", "https://uos-scv.store", "https://scv-db.netlify.app"));
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);
