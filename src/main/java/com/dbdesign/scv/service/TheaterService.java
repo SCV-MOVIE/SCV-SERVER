@@ -1,5 +1,6 @@
 package com.dbdesign.scv.service;
 
+import com.dbdesign.scv.dto.TheaterDTO;
 import com.dbdesign.scv.dto.TheaterFormDTO;
 import com.dbdesign.scv.dto.UpdateTheaterFormDTO;
 import com.dbdesign.scv.entity.Seat;
@@ -13,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class TheaterService {
@@ -173,5 +176,19 @@ public class TheaterService {
         // 논리적 삭제
         theater.setDeleted('Y');
         theaterRepository.save(theater);
+    }
+
+    // 상영관 리스트 반환
+    public List<TheaterDTO> showTheaterList() {
+
+        List<TheaterDTO> theaterDTOList = new ArrayList<>();
+
+        for (Theater theater : theaterRepository.findAll()) {
+
+            TheaterDTO theaterDTO = TheaterDTO.from(theater);
+            theaterDTOList.add(theaterDTO);
+        }
+
+        return theaterDTOList;
     }
 }

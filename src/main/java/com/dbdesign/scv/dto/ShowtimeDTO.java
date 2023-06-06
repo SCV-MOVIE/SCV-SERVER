@@ -41,6 +41,9 @@ public class ShowtimeDTO {
     @ApiModelProperty(value = "상영관 레이아웃", example = "10x10", required = true)
     private String theaterLayout;
 
+    @ApiModelProperty(value = "상영관 id(Primary Key)", example = "1", required = true)
+    private int theaterId;
+
     public static ShowtimeDTO from(Showtime entity) {
 
         return ShowtimeDTO.builder()
@@ -54,6 +57,7 @@ public class ShowtimeDTO {
                 .theaterName("") // service에서 채울 예정
                 .theaterType(entity.getTheater().getTheaterType().getName())
                 .theaterLayout(entity.getTheater().getLayout())
+                .theaterId(entity.getTheater().getId().intValue())
                 .build();
     }
 }
