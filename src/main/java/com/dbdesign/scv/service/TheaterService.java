@@ -3,17 +3,14 @@ package com.dbdesign.scv.service;
 import com.dbdesign.scv.dto.TheaterDTO;
 import com.dbdesign.scv.dto.TheaterFormDTO;
 import com.dbdesign.scv.dto.UpdateTheaterFormDTO;
-import com.dbdesign.scv.entity.Seat;
-import com.dbdesign.scv.entity.Showtime;
-import com.dbdesign.scv.entity.Theater;
-import com.dbdesign.scv.entity.TheaterType;
+import com.dbdesign.scv.entity.*;
 import com.dbdesign.scv.repository.*;
+import com.dbdesign.scv.util.TicketStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,14 +22,16 @@ public class TheaterService {
     private final TheaterRepository theaterRepository;
     private final SeatRepository seatRepository;
     private final ShowtimeRepository showtimeRepository;
+    private final TicketSeatRepository ticketSeatRepository;
     private final TicketRepository ticketRepository;
     private final TheaterTypeRepository theaterTypeRepository;
 
 
-    public TheaterService(TheaterRepository theaterRepository, SeatRepository seatRepository, ShowtimeRepository showtimeRepository, TicketRepository ticketRepository, TheaterTypeRepository theaterTypeRepository) {
+    public TheaterService(TheaterRepository theaterRepository, SeatRepository seatRepository, ShowtimeRepository showtimeRepository, TicketSeatRepository ticketSeatRepository, TicketRepository ticketRepository, TheaterTypeRepository theaterTypeRepository) {
         this.theaterRepository = theaterRepository;
         this.seatRepository = seatRepository;
         this.showtimeRepository = showtimeRepository;
+        this.ticketSeatRepository = ticketSeatRepository;
         this.ticketRepository = ticketRepository;
         this.theaterTypeRepository = theaterTypeRepository;
     }
@@ -44,6 +43,7 @@ public class TheaterService {
         Theater theater = theaterRepository.findTheaterById((long) updateTheaterFormDTO.getTheaterId());
         TheaterType theaterType = theaterTypeRepository.findTheaterTypeByName(updateTheaterFormDTO.getTheaterType());
 
+
         // 새로 만들어질 상영관의 테마가 존재하지 않는 테마일 경우
         if (theaterType == null) {
             throw new IllegalArgumentException("새로 만들어질 상영관의 테마가 존재하지 않는 테마입니다.");
@@ -54,21 +54,29 @@ public class TheaterService {
             throw new IllegalArgumentException("수정할 상영관이 존재하지 않습니다.");
         }
 
+        List<Showtime> showtimeList = showtimeRepository.findAllByTheater(theater);
+
         // 상영관 수정 요청 시간 (yyyy-MM-dd HH:mm)
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date formattedRequestDateTime;
-        try {
-            formattedRequestDateTime = format.parse(String.valueOf(LocalDateTime.now()));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+
+        formattedRequestDateTime = new Date();
+
+        // 수정할 상영관에 예매된 티켓이 있는 경우
+        if (showtimeList.size() != 0) {
+            for (Showtime showtime : showtimeList) {
+                for (Ticket ticket : ticketRepository.findAllByShowtime(showtime)) {
+                    for (TicketSeat ticketSeat : ticketSeatRepository.findAllByTicket(ticket)) {
+                        if (!ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED) || !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED)) {
+                            throw new IllegalArgumentException("예매된 티켓이 있는 상영관은 수정할 수 없습니다.");
+                        }
+                    }
+                }
+            }
         }
 
-        // 수정될 상영관에 예매된 티켓이 있는 경우 or 수정될 상영관이 요청 시점에 이미 상영되고 있는 경우
+        // 수정될 상영관이 요청 시점에 이미 상영되고 있는 경우
         for (Showtime showtime : showtimeRepository.findAll()) {
-
-            if (ticketRepository.findAllByShowtime(showtime).size() != 0) {
-                throw new IllegalArgumentException("예매된 티켓이 있는 상영관은 수정할 수 없습니다.");
-            }
 
             // 범위의 시작 시간
             String rangeStartDateTime = showtime.getStartDate();
@@ -135,6 +143,12 @@ public class TheaterService {
     // 상영관 등록 (좌석 포함)
     @Transactional
     public void makeTheater(TheaterFormDTO theaterFormDTO) {
+
+        Theater oldTheater = theaterRepository.findTheaterByName(theaterFormDTO.getName());
+
+        if (oldTheater != null && oldTheater.getDeleted() == 'N') { // 중복 등록 방지 && 삭제된 거면 가능
+            throw new IllegalArgumentException("이미 등록된 상영관입니다.");
+        }
 
         TheaterType theaterType = theaterTypeRepository.findTheaterTypeByName(theaterFormDTO.getTheaterType());
 
