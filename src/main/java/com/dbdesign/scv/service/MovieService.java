@@ -39,25 +39,19 @@ public class MovieService {
             throw new IllegalArgumentException("이미 등록된 영화입니다.");
         }
 
-        Movie movie = Movie.builder()
-                .name(movieFormDTO.getName())
-                .length(movieFormDTO.getLength())
-                .rating(movieFormDTO.getRating())
-                .director(movieFormDTO.getDirector())
-                .introduction(movieFormDTO.getIntroduction())
-                .distributor(movieFormDTO.getDistributor())
-                .imgUrl(movieFormDTO.getImgUrl())
-                .actor(movieFormDTO.getActor())
-                .staff(movieFormDTO.getStaff())
-                .deleted('N')
-                .build();
+        Movie movie = Movie.builder().name(movieFormDTO.getName()).length(movieFormDTO.getLength()).rating(movieFormDTO.getRating()).director(movieFormDTO.getDirector()).introduction(movieFormDTO.getIntroduction()).distributor(movieFormDTO.getDistributor()).imgUrl(movieFormDTO.getImgUrl()).actor(movieFormDTO.getActor()).staff(movieFormDTO.getStaff()).deleted('N').build();
 
         movieRepository.save(movie);
 
         for (GenreDTO genreDTO : movieFormDTO.getGenreDTOList()) {
             MovieGenre movieGenre = new MovieGenre();
             movieGenre.setMovie(movie);
-            movieGenre.setGenre(genreRepository.findGenreByName(genreDTO.getName()));
+
+            for (Genre genre : genreRepository.findAll()) {
+                if (genre.getDeleted() == 'N' && genre.getName().equals(genreDTO.getName())) {
+                    movieGenre.setGenre(genre);
+                }
+            }
 
             movieGenreRepository.save(movieGenre);
         }
@@ -94,9 +88,14 @@ public class MovieService {
         movieGenreRepository.deleteMovieGenresByMovie(movie);
 
         for (GenreDTO genreDTO : updateMovieDTO.getGenreDTOList()) {
-            Genre newGenre = genreRepository.findGenreByName(genreDTO.getName());
-            MovieGenre movieGenre = new MovieGenre();
 
+            Genre newGenre = null;
+            for (Genre genre : genreRepository.findAll()) {
+                if (genre.getDeleted() == 'N' && genre.getName().equals(genreDTO.getName())) {
+                    newGenre = genre;
+                }
+            }
+            MovieGenre movieGenre = new MovieGenre();
             movieGenre.setMovie(movie);
             movieGenre.setGenre(newGenre);
 
@@ -158,11 +157,10 @@ public class MovieService {
     @Transactional
     public void registerGenre(GenreDTO genreDTO) {
 
-        Genre oldGenre = genreRepository.findGenreByName(genreDTO.getName());
-
-        if (oldGenre != null && oldGenre.getDeleted() == 'N') { // 중복 등록 방지 && 삭제된 거면 가능
-            System.out.println(oldGenre.getName());
-            throw new IllegalArgumentException("이미 등록된 장르입니다.");
+        for (Genre genre : genreRepository.findAll()) {
+            if (genre.getDeleted() == 'N' && genre.getName().equals(genreDTO.getName())) { // 중복 등록 방지 && 삭제된 거면 가능
+                throw new IllegalArgumentException("이미 등록된 장르입니다.");
+            }
         }
 
         Genre genre = new Genre();
@@ -192,9 +190,9 @@ public class MovieService {
     @Transactional
     public void deleteGenre(String name) {
 
-        Genre genre = genreRepository.findGenreByName(name);
+        List<Genre> genreList = genreRepository.findAllByName(name);
 
-        if (genre == null) { // 받은 name 으로 장르가 존재하는 지 확인
+        if (genreList.size() == 0) { // 받은 name 으로 장르가 존재하는 지 확인
             throw new IllegalArgumentException("삭제할 장르가 존재하지 않습니다.");
         }
 
@@ -205,7 +203,9 @@ public class MovieService {
         }
 
         // 논리적 삭제
-        genre.setDeleted('Y');
-        genreRepository.save(genre);
+        for (Genre genre : genreList) {
+            genre.setDeleted('Y');
+            genreRepository.save(genre);
+        }
     }
 }

@@ -164,7 +164,7 @@ public class ClientService {
     // 모든 유저 리스트 반환
     public List<ClientDTO> getUserList() {
 
-        return clientRepository.findAll().stream().map(ClientDTO::from).collect(Collectors.toList());
+        return clientRepository.findAllByIsMember('Y').stream().map(ClientDTO::from).collect(Collectors.toList());
     }
 
     // 현재 회원 정보 반환
