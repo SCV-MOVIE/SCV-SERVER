@@ -391,9 +391,15 @@ public class TicketService {
         ticketRepository.save(ticket);
 
         // 포인트 반환
-        Client client = ticket.getClient();
-        client.setPoint(client.getPoint() + ticket.getUsedPoint());
-        clientRepository.save(client);
+        if (paymentRepository.findPaymentByTicket(ticket).getMethod().equals(PaymentMethod.ACCOUNT) || paymentRepository.findPaymentByTicket(ticket).getMethod().equals(PaymentMethod.POINT)) { // 계좌/포인트로 결제한 경우, 사용한 포인트만 반환
+            Client client = ticket.getClient();
+            client.setPoint(client.getPoint() + ticket.getUsedPoint());
+            clientRepository.save(client);
+        } else if (paymentRepository.findPaymentByTicket(ticket).getMethod().equals(PaymentMethod.CARD)) { // 카드로 결제한 경우, 전액 반환
+            Client client = ticket.getClient();
+            client.setPoint(client.getPoint() + ticket.getPrice());
+            clientRepository.save(client);
+        }
     }
 
     // 예매번호로 티켓 조회
