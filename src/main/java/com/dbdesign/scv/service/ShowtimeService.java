@@ -270,21 +270,22 @@ public class ShowtimeService {
 
         for (Showtime showtime : showtimeRepository.findAll()) {
 
+            int totalPrice = 0;
             int reservedSeatNm = 0;
 
             // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
             // 예약된 좌석을 돌며, 좌석이 상영일정의 배당된 상영관 좌석인 경우, 좌석과 관련된 티켓의 상태를 고려하여 예약 좌석 수를 셈
-            for (TicketSeat ticketSeat : ticketSeatRepository.findAll()) {
-                if (ticketSeat.getTicket().getShowtime().getId().equals(showtime.getId())) {
-                    if (!ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
-                        reservedSeatNm++;
-                    }
+            for (Ticket ticket : ticketRepository.findAllByShowtime(showtime)) {
+                if (!ticket.getStatus().equals(TicketStatus.REJECTED) && !ticket.getStatus().equals(TicketStatus.CANCELLED)) {
+                    totalPrice += ticket.getPrice();
                 }
             }
 
+            reservedSeatNm = totalPrice / 10000;
+
             ShowtimeDTO showtimeDTO = ShowtimeDTO.from(showtime);
-            showtimeDTO.setRemainSeatNm(seatRepository.findAllByTheater(showtime.getTheater()).size() - reservedSeatNm);
-            showtimeDTO.setTheaterSize(seatRepository.findAllByTheater(showtime.getTheater()).size());
+            showtimeDTO.setRemainSeatNm(convertLayoutSize(showtime.getTheater().getLayout()) - reservedSeatNm);
+            showtimeDTO.setTheaterSize(convertLayoutSize(showtime.getTheater().getLayout()));
 
             // 서비스 단에서 MovieDTO 에 Genre 추가
             List<GenreDTO> genreDTOList = new ArrayList<>();
@@ -304,6 +305,14 @@ public class ShowtimeService {
         return showtimeDTOList;
     }
 
+    public int convertLayoutSize(String layout) {
+        String[] dimensions = layout.split("x");
+        int width = Integer.parseInt(dimensions[0]);
+        int height = Integer.parseInt(dimensions[1]);
+        int result = width * height;
+        return result;
+    }
+
     // 공개된 상영일정 리스트 반환
     public List<ShowtimeDTO> publicShowtimeList() {
 
@@ -312,21 +321,23 @@ public class ShowtimeService {
         for (Showtime showtime : showtimeRepository.findAll()) {
 
             if (showtime.getIsPublic() == 'Y') { // 공개된 상영일정에 대해서만 로직 적용
+
+                int totalPrice = 0;
                 int reservedSeatNm = 0;
 
                 // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
                 // 예약된 좌석을 돌며, 좌석이 상영일정의 배당된 상영관 좌석인 경우, 좌석과 관련된 티켓의 상태를 고려하여 예약 좌석 수를 셈
-                for (TicketSeat ticketSeat : ticketSeatRepository.findAll()) {
-                    if (ticketSeat.getTicket().getShowtime().getId().equals(showtime.getId())) {
-                        if (!ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
-                            reservedSeatNm++;
-                        }
+                for (Ticket ticket : ticketRepository.findAllByShowtime(showtime)) {
+                    if (!ticket.getStatus().equals(TicketStatus.REJECTED) && !ticket.getStatus().equals(TicketStatus.CANCELLED)) {
+                        totalPrice += ticket.getPrice();
                     }
                 }
 
+                reservedSeatNm = totalPrice / 10000;
+
                 ShowtimeDTO showtimeDTO = ShowtimeDTO.from(showtime);
-                showtimeDTO.setRemainSeatNm(seatRepository.findAllByTheater(showtime.getTheater()).size() - reservedSeatNm);
-                showtimeDTO.setTheaterSize(seatRepository.findAllByTheater(showtime.getTheater()).size()); // 상영관으로 모든 좌석을 가져와서 크기를 넣음
+                showtimeDTO.setRemainSeatNm(convertLayoutSize(showtime.getTheater().getLayout()) - reservedSeatNm);
+                showtimeDTO.setTheaterSize(convertLayoutSize(showtime.getTheater().getLayout()));
 
                 // 서비스 단에서 MovieDTO 에 Genre 추가
                 List<GenreDTO> genreDTOList = new ArrayList<>();
