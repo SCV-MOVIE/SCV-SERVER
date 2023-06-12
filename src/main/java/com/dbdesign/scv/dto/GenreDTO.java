@@ -9,5 +9,5 @@ import lombok.Setter;
 public class GenreDTO {
 
     @ApiModelProperty(value = "장르 이름", example = "horror", required = true)
-    String name;
+    private String name;
 }

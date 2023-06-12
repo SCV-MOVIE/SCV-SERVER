@@ -4,6 +4,7 @@ import com.dbdesign.scv.dto.*;
 import com.dbdesign.scv.entity.Genre;
 import com.dbdesign.scv.entity.Movie;
 import com.dbdesign.scv.entity.MovieGenre;
+import com.dbdesign.scv.entity.Showtime;
 import com.dbdesign.scv.repository.GenreRepository;
 import com.dbdesign.scv.repository.MovieGenreRepository;
 import com.dbdesign.scv.repository.MovieRepository;
@@ -207,5 +208,41 @@ public class MovieService {
             genre.setDeleted('Y');
             genreRepository.save(genre);
         }
+    }
+
+    // 영화 장르 수정 (어드민)
+    @Transactional
+    public void updateGenre(UpdateGenreDTO updateGenreDTO) {
+
+        List<Genre> genreList = genreRepository.findAllByName(updateGenreDTO.getOldName());
+
+        Genre oldGenre = null;
+        for (Genre genre : genreList) {
+            if (genre.getDeleted() == 'N') {
+                oldGenre = genre;
+            }
+        }
+
+        // 수정할 장르가 존재하지 않는 경우
+        if (oldGenre == null) {
+            throw new IllegalArgumentException("수정할 장르가 존재하지 않습니다.");
+        }
+
+
+        for (Showtime showtime : showtimeRepository.findAll()) {
+            for (MovieGenre movieGenre : movieGenreRepository.findMovieGenresByMovie(showtime.getMovie())) {
+                if (movieGenre.getGenre().getId().equals(oldGenre.getId())) {
+                    throw new IllegalArgumentException("이미 상영 중인 영화에 포함된 장르는 수정할 수 없습니다.");
+                }
+            }
+        }
+
+        oldGenre.setDeleted('Y');
+        genreRepository.save(oldGenre);
+
+        Genre newGenre = new Genre();
+        newGenre.setName(updateGenreDTO.getNewName());
+        newGenre.setDeleted('N');
+        genreRepository.save(newGenre);
     }
 }

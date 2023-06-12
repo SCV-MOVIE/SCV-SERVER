@@ -1,12 +1,16 @@
 package com.dbdesign.scv.service;
 
 import com.dbdesign.scv.dto.LoginDTO;
+import com.dbdesign.scv.dto.UpdateUserInfoByAdminDTO;
 import com.dbdesign.scv.entity.Admin;
+import com.dbdesign.scv.entity.Client;
 import com.dbdesign.scv.repository.AdminRepository;
+import com.dbdesign.scv.repository.ClientRepository;
 import com.dbdesign.scv.util.SessionConst;
 import com.dbdesign.scv.util.TestConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -21,17 +25,17 @@ import java.util.Objects;
 public class AdminService {
 
     private final AdminRepository adminRepository;
+    private final ClientRepository clientRepository;
 
-    public AdminService(AdminRepository adminRepository) {
+    public AdminService(AdminRepository adminRepository, ClientRepository clientRepository) {
         this.adminRepository = adminRepository;
+        this.clientRepository = clientRepository;
     }
 
     // 로그인
     public void login(LoginDTO loginDTO) {
 
         Admin adminMember = adminRepository.findAdminByLoginId(loginDTO.getLoginId());
-
-        System.out.println(adminMember);
 
         // 아이디 존재하지 않는 경우
         if (adminMember == null) { // 받은 loginId 로 회원이 존재하는 지 확인
@@ -72,5 +76,21 @@ public class AdminService {
                 response.addCookie(cookie);
             }
         }
+    }
+
+    // 회원 정보 수정 (어드민)
+    @Transactional
+    public void updateUserInfo(UpdateUserInfoByAdminDTO updateUserInfoByAdminDTO) {
+
+        Client client = clientRepository.findClientById(updateUserInfoByAdminDTO.getClientId());
+
+        // 고객이 존재하지 않는 경우
+        if (client == null) { // 받은 id로 회원이 존재하는 지 확인
+            throw new IllegalArgumentException("고객이 존재하지 않습니다.");
+        }
+
+        client.setMembership(updateUserInfoByAdminDTO.getNewMembership());
+        client.setPoint(updateUserInfoByAdminDTO.getNewPoint());
+        clientRepository.save(client);
     }
 }
