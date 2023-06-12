@@ -72,6 +72,15 @@ public class MovieController {
         return ResponseEntity.ok().body(movieService.genreList());
     }
 
+    // 영화 장르 수정 (어드민)
+    @PatchMapping("/genre")
+    @ApiOperation(value = "영화 장르 수정 (어드민)", notes = "영화 관리자는 장르를 수정할 수 있습니다.")
+    public ResponseEntity<Void> updateGenre(@RequestBody UpdateGenreDTO updateGenreDTO) {
+
+        movieService.updateGenre(updateGenreDTO);
+        return ResponseEntity.ok().build();
+    }
+
     // 영화 장르 삭제 (논리적 삭제, 어드민)
     @PatchMapping("/genre/delete/{name}")
     @ApiOperation(value = "영화 장르 (논리적) 삭제 (어드민)", notes = "영화 관리자는 장르를 삭제할 수 있습니다.")

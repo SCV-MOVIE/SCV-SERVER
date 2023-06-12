@@ -1,13 +1,12 @@
 package com.dbdesign.scv.controller;
 
 import com.dbdesign.scv.dto.LoginDTO;
+import com.dbdesign.scv.dto.UpdateUserInfoByAdminDTO;
+import com.dbdesign.scv.dto.UpdateUserInfoDTO;
 import com.dbdesign.scv.service.AdminService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,6 +36,15 @@ public class AdminController {
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
 
         adminService.logout(request, response);
+        return ResponseEntity.ok().build();
+    }
+
+    // 회원 정보 수정 (어드민)
+    @PatchMapping("/member/info")
+    @ApiOperation(value = "회원 정보 수정", notes = "회원등급, 포인트를 수정할 수 있습니다.")
+    public ResponseEntity<Void> updateUserInfo(@RequestBody UpdateUserInfoByAdminDTO updateUserInfoByAdminDTO) {
+
+        adminService.updateUserInfo(updateUserInfoByAdminDTO);
         return ResponseEntity.ok().build();
     }
 }

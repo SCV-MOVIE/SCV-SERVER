@@ -273,12 +273,12 @@ public class ShowtimeService {
             int reservedSeatNm = 0;
 
             // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
-            for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
-
-                TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
-
-                if (ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
-                    reservedSeatNm++;
+            // 예약된 좌석을 돌며, 좌석이 상영일정의 배당된 상영관 좌석인 경우, 좌석과 관련된 티켓의 상태를 고려하여 예약 좌석 수를 셈
+            for (TicketSeat ticketSeat : ticketSeatRepository.findAll()) {
+                if (ticketSeat.getTicket().getShowtime().getId().equals(showtime.getId())) {
+                    if (!ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
+                        reservedSeatNm++;
+                    }
                 }
             }
 
@@ -315,12 +315,12 @@ public class ShowtimeService {
                 int reservedSeatNm = 0;
 
                 // 예약된 좌석 수 = 상영관의 모든 좌석 중, ticket 의 상태가 REJECTED 혹은 CANCELLED 가 아닌 ticket_seat 테이블에 존재하는 행의 수
-                for (Seat seat : seatRepository.findAllByTheater(showtime.getTheater())) {
-
-                    TicketSeat ticketSeat = ticketSeatRepository.findTicketSeatBySeat(seat);
-
-                    if (ticketSeat != null && !ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
-                        reservedSeatNm++;
+                // 예약된 좌석을 돌며, 좌석이 상영일정의 배당된 상영관 좌석인 경우, 좌석과 관련된 티켓의 상태를 고려하여 예약 좌석 수를 셈
+                for (TicketSeat ticketSeat : ticketSeatRepository.findAll()) {
+                    if (ticketSeat.getTicket().getShowtime().getId().equals(showtime.getId())) {
+                        if (!ticketSeat.getTicket().getStatus().equals(TicketStatus.REJECTED) && !ticketSeat.getTicket().getStatus().equals(TicketStatus.CANCELLED)) {
+                            reservedSeatNm++;
+                        }
                     }
                 }
 
