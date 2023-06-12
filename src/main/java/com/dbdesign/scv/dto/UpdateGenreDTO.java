@@ -8,9 +8,9 @@ import lombok.Setter;
 @Getter
 public class UpdateGenreDTO {
 
-    @ApiModelProperty(value = "장르 고유 id(Primary Key)", example = "1", required = true)
-    private Long id;
+    @ApiModelProperty(value = "수정할 장르 이름", example = "thriller", required = true)
+    private String oldName;
 
-    @ApiModelProperty(value = "새로운 장르 이름", example = "thriller", required = true)
+    @ApiModelProperty(value = "새로운 장르 이름", example = "comedy", required = true)
     private String newName;
 }

@@ -86,7 +86,7 @@ public class ShowtimeService {
                 // 등록할 상영일정의 일자가 이미 상영되고 있는 시간에 속하는 지 확인
                 try {
                     Date formattedStartDateTime = format.parse(startDateTime);
-                    if (formattedStartDateTime.compareTo(rangeStartDate) >= 0 && formattedStartDateTime.compareTo(rangeEndDate) < 0) {
+                    if (showtimeFormDTO.getTheaterId() == showtime.getTheater().getId() && formattedStartDateTime.compareTo(rangeStartDate) >= 0 && formattedStartDateTime.compareTo(rangeEndDate) < 0) {
                         throw new IllegalArgumentException("해당 상영관에 상영 일정이 있습니다.");
                     }
                 } catch (ParseException e) {
@@ -142,7 +142,7 @@ public class ShowtimeService {
 
             System.out.println("최대 회차 : " + maxRound);
 
-            if (requestedShowtime.getRound() != maxRound + 1) {
+            if (requestedShowtime.getRound() != maxRound + 1 && requestedShowtime.getRound() == maxRound) {
                 throw new IllegalArgumentException("입력하신 상영 일정의 회차의 순서가 맞지 않습니다.");
             }
         }

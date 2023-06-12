@@ -214,22 +214,35 @@ public class MovieService {
     @Transactional
     public void updateGenre(UpdateGenreDTO updateGenreDTO) {
 
-        Genre genre = genreRepository.findGenreById(updateGenreDTO.getId());
+        List<Genre> genreList = genreRepository.findAllByName(updateGenreDTO.getOldName());
+
+        Genre oldGenre = null;
+        for (Genre genre : genreList) {
+            if (genre.getDeleted() == 'N') {
+                oldGenre = genre;
+            }
+        }
 
         // 수정할 장르가 존재하지 않는 경우
-        if (genre == null) { // 받은 id 로 장르가 존재하는 지 확인
+        if (oldGenre == null) {
             throw new IllegalArgumentException("수정할 장르가 존재하지 않습니다.");
         }
 
+
         for (Showtime showtime : showtimeRepository.findAll()) {
             for (MovieGenre movieGenre : movieGenreRepository.findMovieGenresByMovie(showtime.getMovie())) {
-                if (movieGenre.getGenre().getId().equals(updateGenreDTO.getId())) {
+                if (movieGenre.getGenre().getId().equals(oldGenre.getId())) {
                     throw new IllegalArgumentException("이미 상영 중인 영화에 포함된 장르는 수정할 수 없습니다.");
                 }
             }
         }
 
-        genre.setName(updateGenreDTO.getNewName());
-        genreRepository.save(genre);
+        oldGenre.setDeleted('Y');
+        genreRepository.save(oldGenre);
+
+        Genre newGenre = new Genre();
+        newGenre.setName(updateGenreDTO.getNewName());
+        newGenre.setDeleted('N');
+        genreRepository.save(newGenre);
     }
 }

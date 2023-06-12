@@ -8,9 +8,6 @@ import lombok.Setter;
 @Setter
 public class GenreDTO {
 
-    @ApiModelProperty(value = "장르 id(Primary Key)", example = "1", required = true)
-    private int id;
-
     @ApiModelProperty(value = "장르 이름", example = "horror", required = true)
     private String name;
 }
